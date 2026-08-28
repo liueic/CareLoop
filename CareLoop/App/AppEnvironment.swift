@@ -63,7 +63,7 @@ final class AppEnvironment {
         recipes = ContentLibrary.loadRecipes()
         exercises = ContentLibrary.loadExercises()
         rules = GuidelineRules.load()
-        dietRules = DietGuidelineRules.load()
+        dietRules = DietGuidelineCompiler.mergedWithClinicalAdvice(DietGuidelineRules.load())
         DietSpotlightIndexer.reindex(recipes: recipes, dietRules: dietRules)
         refreshProvider()
         ProviderManager(context: container.mainContext).bootstrapIfNeeded()

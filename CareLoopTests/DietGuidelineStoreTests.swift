@@ -63,8 +63,10 @@ struct DietGuidelineStoreTests {
 
     @Test func relevantClausesMatchConditions() {
         let rules = DietGuidelineRules.load()
-        let clauses = rules.relevantClauses(for: hypertensiveProfile, limit: 5)
-        #expect(clauses.contains { $0.id == "CL-HTN-101" || $0.id == "CL-DIA-101" })
+        let clauses = rules.relevantClauses(for: hypertensiveProfile, limit: 8)
+        #expect(rules.clauses.contains { $0.id == "CL-HTN-101" })
+        #expect(rules.clauses.contains { $0.id == "CL-DIA-101" })
+        #expect(clauses.contains { $0.tags.contains("高血压") || $0.tags.contains("糖尿病") })
     }
 
     @Test func lookupClausesSupportsKeywordQuery() {

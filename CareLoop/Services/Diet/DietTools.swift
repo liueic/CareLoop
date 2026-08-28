@@ -8,6 +8,36 @@ struct DietAgentContext: Sendable {
     var dietRules: DietGuidelineRules
     var guardrailRules: GuidelineRules
     var history: [(role: String, content: String)]
+    var recentDietLogSummary: String
+    var recentGlucose: String?
+    var recentBloodPressure: String?
+    var currentMedicationNames: [String]
+
+    init(
+        profile: ProfileTags,
+        trendSummary: String,
+        todayStatus: String,
+        recipes: [Recipe],
+        dietRules: DietGuidelineRules,
+        guardrailRules: GuidelineRules,
+        history: [(role: String, content: String)] = [],
+        recentDietLogSummary: String = "",
+        recentGlucose: String? = nil,
+        recentBloodPressure: String? = nil,
+        currentMedicationNames: [String] = []
+    ) {
+        self.profile = profile
+        self.trendSummary = trendSummary
+        self.todayStatus = todayStatus
+        self.recipes = recipes
+        self.dietRules = dietRules
+        self.guardrailRules = guardrailRules
+        self.history = history
+        self.recentDietLogSummary = recentDietLogSummary
+        self.recentGlucose = recentGlucose
+        self.recentBloodPressure = recentBloodPressure
+        self.currentMedicationNames = currentMedicationNames
+    }
 }
 
 struct DietAgentResponse: Equatable, Sendable {
@@ -40,12 +70,84 @@ enum DietTools: Sendable {
         return dietRules.relevantClauses(for: profile, keywords: keywords, limit: limit)
     }
 
+    static func lookupClausesHybrid(
+        profile: ProfileTags,
+        dietRules: DietGuidelineRules,
+        query: String?,
+        limit: Int = 5
+    ) async -> [DietClause] {
+        let tagged = lookupClauses(profile: profile, dietRules: dietRules, query: query, limit: limit)
+        let spotlightIDs = await DietSpotlightIndexer.searchClauseIDs(matching: query ?? "")
+        return mergeClauses(
+            tagged: tagged,
+            spotlightIDs: spotlightIDs,
+            allClauses: dietRules.clauses,
+            limit: limit
+        )
+    }
+
+    static func mergeClauses(
+        tagged: [DietClause],
+        spotlightIDs: [String],
+        allClauses: [DietClause],
+        limit: Int
+    ) -> [DietClause] {
+        let lookup = Dictionary(uniqueKeysWithValues: allClauses.map { ($0.id, $0) })
+        var seen = Set<String>()
+        var result: [DietClause] = []
+        for clause in tagged where seen.insert(clause.id).inserted {
+            result.append(clause)
+        }
+        for identifier in spotlightIDs {
+            guard seen.insert(identifier).inserted, let clause = lookup[identifier] else { continue }
+            result.append(clause)
+        }
+        return Array(result.prefix(limit))
+    }
+
+    static func dietLogSummary(
+        entries: [DailyLogEntry],
+        now: Date = Date(),
+        calendar: Calendar = .current
+    ) -> String {
+        let todayDiet = entries.filter { entry in
+            calendar.isDate(entry.createdAt, inSameDayAs: now)
+                && entry.tags.contains(LogTag.diet.rawValue)
+                && entry.confirmationState != .pendingAI
+        }
+        return todayDiet
+            .sorted { $0.createdAt > $1.createdAt }
+            .prefix(5)
+            .map(\.displayBody)
+            .filter { !$0.isEmpty }
+            .joined(separator: "；")
+    }
+
+    static func metricSummary(label: String, value: Double?, unit: String, source: String) -> String? {
+        guard let value else { return nil }
+        return "\(label) \(formatMetric(value)) \(unit)（来源：\(source)）"
+    }
+
+    static func bloodPressureSummary(systolic: Double?, diastolic: Double?, source: String) -> String? {
+        guard let systolic, let diastolic else { return nil }
+        return "血压 \(formatMetric(systolic, decimals: 0))/\(formatMetric(diastolic, decimals: 0)) mmHg（来源：\(source)）"
+    }
+
     static func profileAndStatusJSON(context: DietAgentContext) -> String {
-        let payload: [String: Any] = [
+        var payload: [String: Any] = [
             "profile": (try? JSONSerialization.jsonObject(with: (try? JSONEncoder().encode(context.profile)) ?? Data())) ?? [:],
             "todayStatus": context.todayStatus,
             "trendSummary": context.trendSummary,
+            "recentDietLogSummary": context.recentDietLogSummary,
+            "medicationNames": context.currentMedicationNames,
+            "medicationNote": "用药名称仅供提醒咨询医生或药师，禁止据此判断食物与药物相互作用或调整剂量。",
         ]
+        if let recentGlucose = context.recentGlucose {
+            payload["recentGlucose"] = recentGlucose
+        }
+        if let recentBloodPressure = context.recentBloodPressure {
+            payload["recentBloodPressure"] = recentBloodPressure
+        }
         guard let data = try? JSONSerialization.data(withJSONObject: payload, options: [.sortedKeys]),
               let text = String(data: data, encoding: .utf8) else {
             return "{}"
@@ -117,5 +219,9 @@ enum DietTools: Sendable {
             return parseAgentJSON(String(text[start...end]))
         }
         return (text, [], [])
+    }
+
+    private static func formatMetric(_ value: Double, decimals: Int = 1) -> String {
+        String(format: "%.\(decimals)f", value)
     }
 }

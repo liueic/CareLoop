@@ -6,3 +6,8 @@ build/
 xcuserdata/
 __pycache__/
 *.pyc
+data/*.sqlite
+data/*.sqlite-journal
+data/*.sqlite-wal
+data/raw/
+data/work/

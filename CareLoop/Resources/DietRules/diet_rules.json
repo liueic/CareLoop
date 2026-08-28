@@ -1,49 +1,98 @@
 {
-  "version": "1.0-compiled",
+  "version": "1.0-compiled+clinical",
   "disclaimer": "饮食条款由慢病管理指南与 ClinicalRules 编译而来，用于候选过滤与解释引用，不构成个体化医疗处方。",
   "constraints": [
     {
       "id": "DC-HTN-001",
-      "conditions": ["高血压"],
-      "dietGoals": ["控盐"],
-      "forbidIngredients": ["腊肉", "咸鱼", "泡菜", "腐乳"],
-      "forbiddenTags": ["高盐", "腌制", "重口"],
+      "conditions": [
+        "高血压"
+      ],
+      "dietGoals": [
+        "控盐"
+      ],
+      "forbidIngredients": [
+        "腊肉",
+        "咸鱼",
+        "泡菜",
+        "腐乳"
+      ],
+      "forbiddenTags": [
+        "高盐",
+        "腌制",
+        "重口"
+      ],
       "requiredTagsAny": [],
       "notes": "每日钠摄入建议低于 5g 盐当量（约 2000mg 钠），烹调少放酱油与味精。"
     },
     {
       "id": "DC-DIA-001",
-      "conditions": ["糖尿病", "代谢综合征"],
-      "dietGoals": ["控糖"],
+      "conditions": [
+        "糖尿病",
+        "代谢综合征"
+      ],
+      "dietGoals": [
+        "控糖"
+      ],
       "forbidIngredients": [],
-      "forbiddenTags": ["高糖", "甜品", "含糖饮料"],
+      "forbiddenTags": [
+        "高糖",
+        "甜品",
+        "含糖饮料"
+      ],
       "requiredTagsAny": [],
       "notes": "控制精制碳水与高升糖指数食物，增加膳食纤维，规律进餐。"
     },
     {
       "id": "DC-CVD-001",
-      "conditions": ["心脏病", "房颤"],
-      "dietGoals": ["控盐", "低脂"],
-      "forbidIngredients": ["动物内脏", "肥肉"],
-      "forbiddenTags": ["高脂", "油炸"],
+      "conditions": [
+        "心脏病",
+        "房颤"
+      ],
+      "dietGoals": [
+        "控盐",
+        "低脂"
+      ],
+      "forbidIngredients": [
+        "动物内脏",
+        "肥肉"
+      ],
+      "forbiddenTags": [
+        "高脂",
+        "油炸"
+      ],
       "requiredTagsAny": [],
       "notes": "低盐低脂，避免高饱和脂肪与大量油炸。"
     },
     {
       "id": "DC-GOUT-001",
-      "conditions": ["痛风"],
+      "conditions": [
+        "痛风"
+      ],
       "dietGoals": [],
-      "forbidIngredients": ["动物内脏", "海鲜", "啤酒", "浓汤"],
-      "forbiddenTags": ["高嘌呤"],
+      "forbidIngredients": [
+        "动物内脏",
+        "海鲜",
+        "啤酒",
+        "浓汤"
+      ],
+      "forbiddenTags": [
+        "高嘌呤"
+      ],
       "requiredTagsAny": [],
       "notes": "限制高嘌呤食物与酒精，多饮水。"
     },
     {
       "id": "DC-WEIGHT-001",
       "conditions": [],
-      "dietGoals": ["减重"],
+      "dietGoals": [
+        "减重"
+      ],
       "forbidIngredients": [],
-      "forbiddenTags": ["高糖", "油炸", "高脂"],
+      "forbiddenTags": [
+        "高糖",
+        "油炸",
+        "高脂"
+      ],
       "requiredTagsAny": [],
       "notes": "控制总能量，优先蒸、煮、凉拌，少油少糖。"
     }
@@ -53,57 +102,166 @@
       "id": "CL-HTN-101",
       "title": "减少钠盐摄入",
       "body": "建议减少钠盐摄入（每日<5g），增加钾摄入，控制体重，规律运动（每周≥150分钟中等强度），限制饮酒。",
-      "tags": ["高血压", "控盐"],
+      "tags": [
+        "高血压",
+        "控盐"
+      ],
       "source": "ClinicalRules AD-HTN-101 / 中国高血压防治指南"
     },
     {
       "id": "CL-HTN-102",
       "title": "血压监测与饮食配合",
       "body": "建议每日早晚各测量一次血压，记录结果供医生参考；饮食配合低盐、增加蔬果与全谷物。",
-      "tags": ["高血压", "控盐"],
+      "tags": [
+        "高血压",
+        "控盐"
+      ],
       "source": "ClinicalRules AD-HTN-102"
     },
     {
       "id": "CL-DIA-101",
       "title": "碳水化合物与升糖指数",
       "body": "建议控制碳水化合物摄入，选择低升糖指数食物，增加膳食纤维，规律进餐，避免单次大量精制主食。",
-      "tags": ["糖尿病", "代谢综合征", "控糖"],
+      "tags": [
+        "糖尿病",
+        "代谢综合征",
+        "控糖"
+      ],
       "source": "ClinicalRules AD-DIA-101 / ADA 饮食原则参考"
     },
     {
       "id": "CL-DIA-102",
       "title": "血糖监测提醒",
       "body": "规律监测血糖并记录；如出现反复高血糖或低血糖，请咨询医生调整方案，勿自行改药。",
-      "tags": ["糖尿病", "控糖"],
+      "tags": [
+        "糖尿病",
+        "控糖"
+      ],
       "source": "ClinicalRules AD-DIA-102"
     },
     {
       "id": "CL-CVD-101",
       "title": "心血管危险因素综合管理",
       "body": "定期监测血压、血脂、血糖；戒烟限酒；控制体重（BMI<24）；每周≥150分钟中等强度运动；低盐低脂饮食。",
-      "tags": ["心脏病", "房颤", "控盐", "低脂"],
+      "tags": [
+        "心脏病",
+        "房颤",
+        "控盐",
+        "低脂"
+      ],
       "source": "ClinicalRules AD-CVD-101"
     },
     {
       "id": "CL-GEN-101",
       "title": "通用安全提醒",
       "body": "本应用不提供疾病诊断；饮食建议仅供参考。合并多种慢病或正在用药时，请咨询医生或营养师。",
-      "tags": ["通用"],
+      "tags": [
+        "通用"
+      ],
       "source": "CareLoop Spec §10"
     },
     {
       "id": "CL-COOK-101",
       "title": "烹调方式",
       "body": "优先蒸、煮、炖、凉拌；少油炸、少红烧重口；可用低钠酱油、香草与柠檬增味。",
-      "tags": ["控盐", "通用"],
+      "tags": [
+        "控盐",
+        "通用"
+      ],
       "source": "CareLoop 内容库审定原则"
     },
     {
       "id": "CL-ALLERGY-101",
       "title": "过敏与忌口",
       "body": "严格避开已知食物过敏与医生/用户明确忌口食材；如不确定是否含过敏原，请选择更简单的替代菜。",
-      "tags": ["过敏", "通用"],
+      "tags": [
+        "过敏",
+        "通用"
+      ],
       "source": "CareLoop Onboarding"
+    },
+    {
+      "id": "CL-AD-DIA-101",
+      "title": "饮食控制",
+      "body": "建议控制碳水化合物摄入，选择低升糖指数食物，增加膳食纤维，规律进餐。",
+      "tags": [
+        "控糖",
+        "糖尿病"
+      ],
+      "source": "ClinicalRules AD-DIA-101"
+    },
+    {
+      "id": "CL-AD-DIA-102",
+      "title": "血糖监测",
+      "body": "建议定期监测空腹血糖和餐后2小时血糖，记录血糖变化趋势。",
+      "tags": [
+        "控糖",
+        "糖尿病"
+      ],
+      "source": "ClinicalRules AD-DIA-102"
+    },
+    {
+      "id": "CL-AD-DIA-103",
+      "title": "就医建议",
+      "body": "您的血糖明显偏高，建议尽快就医进行详细检查和治疗方案制定。",
+      "tags": [
+        "控糖",
+        "糖尿病"
+      ],
+      "source": "ClinicalRules AD-DIA-103"
+    },
+    {
+      "id": "CL-AD-DIA-104",
+      "title": "低血糖警告",
+      "body": "您的血糖过低，请立即补充糖分（如糖水、糖果），如出现意识模糊请立即就医。",
+      "tags": [
+        "控糖",
+        "糖尿病"
+      ],
+      "source": "ClinicalRules AD-DIA-104"
+    },
+    {
+      "id": "CL-AD-LIP-101",
+      "title": "饮食调整",
+      "body": "建议减少饱和脂肪和反式脂肪摄入，增加不饱和脂肪酸（如鱼类、坚果），控制胆固醇摄入。",
+      "tags": [
+        "低脂"
+      ],
+      "source": "ClinicalRules AD-LIP-101"
+    },
+    {
+      "id": "CL-AD-TR-103",
+      "title": "CGM血糖波动管理",
+      "body": "连续血糖监测显示血糖波动较大，目标范围内时间（TIR）偏低。建议：1）注意饮食碳水含量和进食时间；2）规律运动有助于稳定血糖；3）与医生讨论是否需要调整治疗方案。",
+      "tags": [
+        "控糖",
+        "糖尿病"
+      ],
+      "source": "ClinicalRules AD-TR-103"
+    },
+    {
+      "id": "CL-AD-CMP-101",
+      "title": "代谢综合征风险",
+      "body": "您存在多项代谢异常（如血压、血糖、血脂、腰围），这些指标相互影响，综合增加心血管风险。建议全面评估并综合管理。",
+      "tags": [
+        "低脂",
+        "心脏病",
+        "控盐",
+        "控糖"
+      ],
+      "source": "ClinicalRules AD-CMP-101"
+    },
+    {
+      "id": "CL-AD-CMP-102",
+      "title": "心血管风险因子管理",
+      "body": "您存在多项心血管危险因素，建议：1）定期监测血压、血脂、血糖；2）戒烟限酒；3）控制体重（BMI<24，腰围达标）；4）每周≥150分钟中等强度运动；5）低盐低脂饮食。",
+      "tags": [
+        "低脂",
+        "心脏病",
+        "控盐",
+        "控糖"
+      ],
+      "source": "ClinicalRules AD-CMP-102"
     }
   ]
 }

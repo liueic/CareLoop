@@ -47,6 +47,32 @@ struct AdviceResult: Codable, Hashable, Sendable {
     }
 }
 
+struct FoodCatalogEntry: Codable, Hashable, Sendable, Identifiable {
+    var foodCode: String
+    var shortDesc: String
+    var longDesc: String
+    var nObs: Int?
+    var kcalPer100g: Double?
+    var sodiumMgPer100g: Double?
+    var sugarGPer100g: Double?
+    var satfatGPer100g: Double?
+    var fiberGPer100g: Double?
+
+    var id: String { foodCode }
+
+    enum CodingKeys: String, CodingKey {
+        case foodCode = "food_code"
+        case shortDesc = "short_desc"
+        case longDesc = "long_desc"
+        case nObs = "n_obs"
+        case kcalPer100g = "kcal_per_100g"
+        case sodiumMgPer100g = "sodium_mg_per_100g"
+        case sugarGPer100g = "sugar_g_per_100g"
+        case satfatGPer100g = "satfat_g_per_100g"
+        case fiberGPer100g = "fiber_g_per_100g"
+    }
+}
+
 enum ContentLibrary {
     static func loadRecipes() -> [Recipe] {
         Bundle.main.decodeJSON("recipes") ?? []
@@ -54,5 +80,9 @@ enum ContentLibrary {
 
     static func loadExercises() -> [ExerciseItem] {
         Bundle.main.decodeJSON("exercises") ?? []
+    }
+
+    static func loadFoodCatalog() -> [FoodCatalogEntry] {
+        Bundle.main.decodeJSON("food_catalog_slim") ?? []
     }
 }

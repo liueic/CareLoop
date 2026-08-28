@@ -237,7 +237,7 @@ enum MetricInsightService {
         llm: any LLMProviding
     ) async -> MetricInsight {
         let prompt = singleMetricPrompt(deviation: deviation, conditions: conditions, doctorAdvice: doctorAdvice)
-        if let insight = await request(prompt: prompt) {
+        if let insight = await request(prompt: prompt, llm: llm) {
             return insight
         }
         return templateInsight(deviation: deviation)
@@ -250,13 +250,13 @@ enum MetricInsightService {
         llm: any LLMProviding
     ) async -> MetricInsight {
         let prompt = metabolicSyndromePrompt(input: input, conditions: conditions, doctorAdvice: doctorAdvice)
-        if let insight = await request(prompt: prompt) {
+        if let insight = await request(prompt: prompt, llm: llm) {
             return insight
         }
         return templateMetabolic(input: input)
     }
 
-    private static func request(prompt: LLMPrompt) async -> MetricInsight? {
+    private static func request(prompt: LLMPrompt, llm: any LLMProviding) async -> MetricInsight? {
         guard let response = try? await llm.complete(prompt: prompt),
               let object = LLMJSON.object(from: response.text) else { return nil }
         let title = object["title"] as? String ?? "指标解读"

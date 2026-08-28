@@ -23,7 +23,7 @@ enum DietAgentFactory {
 enum CloudDietAgentEngine {
     static let systemPrompt = """
     你是慢病日常饮食助手，不是医生。你只能基于工具返回的安全食谱与指南条款回答。
-    红线：不推荐工具列表之外的食谱；不讨论药物剂量、停药、换药；不做诊断；涉及药物与饮食相互作用时引导咨询医生或药师。
+    红线：不推荐工具列表之外的食谱；不讨论药物剂量、停药、换药；不做诊断；用药名只用于提醒咨询医生或药师，禁止判定食物与药物相互作用。
     回答请简洁、可执行，并在 JSON 中给出 citedRecipeIDs 与 citedClauseIDs（如有引用）。
     """
 
@@ -34,8 +34,12 @@ enum CloudDietAgentEngine {
     ) async throws -> DietAgentResponse {
         let safeRecipes = DietTools.filterSafeRecipes(context.recipes, profile: context.profile, dietRules: context.dietRules)
         let allowedRecipeIDs = Set(safeRecipes.map(\.id))
-        let allowedClauses = DietTools.lookupClauses(profile: context.profile, dietRules: context.dietRules, query: userMessage)
-        let allowedClauseIDs = Set(allowedClauses.map(\.id))
+        let allowedClauseIDs = Set(context.dietRules.clauses.map(\.id))
+        let seededClauses = await DietTools.lookupClausesHybrid(
+            profile: context.profile,
+            dietRules: context.dietRules,
+            query: userMessage
+        )
 
         var messages: [LLMChatMessage] = context.history.map { item in
             LLMChatMessage(role: item.role, content: item.content, toolCallID: nil, toolCalls: [])
@@ -60,11 +64,10 @@ enum CloudDietAgentEngine {
             if !assistant.toolCalls.isEmpty {
                 messages.append(assistant)
                 for call in assistant.toolCalls {
-                    let output = executeTool(
+                    let output = await executeTool(
                         call: call,
                         context: context,
-                        safeRecipes: safeRecipes,
-                        allowedClauses: allowedClauses
+                        safeRecipes: safeRecipes
                     )
                     messages.append(
                         LLMChatMessage(
@@ -102,7 +105,7 @@ enum CloudDietAgentEngine {
 
         return fallbackResponse(
             safeRecipes: safeRecipes,
-            clauses: allowedClauses,
+            clauses: seededClauses,
             userMessage: userMessage
         )
     }
@@ -111,7 +114,7 @@ enum CloudDietAgentEngine {
         [
             LLMToolDefinition(
                 name: "get_profile_and_status",
-                description: "获取脱敏用户画像、今日状态与近7天趋势摘要",
+                description: "获取脱敏用户画像、今日状态、饮食手帐摘要与近期血糖血压",
                 parametersJSON: """
                 {"type":"object","properties":{}}
                 """
@@ -136,9 +139,8 @@ enum CloudDietAgentEngine {
     private static func executeTool(
         call: LLMToolCall,
         context: DietAgentContext,
-        safeRecipes: [Recipe],
-        allowedClauses: [DietClause]
-    ) -> String {
+        safeRecipes: [Recipe]
+    ) async -> String {
         switch call.name {
         case "get_profile_and_status":
             return DietTools.profileAndStatusJSON(context: context)
@@ -149,9 +151,11 @@ enum CloudDietAgentEngine {
         case "lookup_diet_clauses":
             let args = LLMJSON.object(from: call.argumentsJSON) ?? [:]
             let query = args["query"] as? String ?? ""
-            let clauses = query.isEmpty
-                ? allowedClauses
-                : DietTools.lookupClauses(profile: context.profile, dietRules: context.dietRules, query: query)
+            let clauses = await DietTools.lookupClausesHybrid(
+                profile: context.profile,
+                dietRules: context.dietRules,
+                query: query.isEmpty ? nil : query
+            )
             return DietTools.clausesJSON(clauses)
         default:
             return "{\"error\":\"unknown_tool\"}"
@@ -183,8 +187,12 @@ enum CloudDietAgentEngine {
     }
 }
 
-struct CloudDietAgent: DietAgentSession {
-    var llm: any LLMProviding
+final class CloudDietAgent: DietAgentSession, @unchecked Sendable {
+    let llm: any LLMProviding
+
+    init(llm: any LLMProviding) {
+        self.llm = llm
+    }
 
     func respond(to userMessage: String, context: DietAgentContext) async throws -> DietAgentResponse {
         try await CloudDietAgentEngine.respond(to: userMessage, context: context, llm: llm)

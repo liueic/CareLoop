@@ -1,5 +1,6 @@
 import SwiftData
 import SwiftUI
+import CoreSpotlight
 
 struct DietChatView: View {
     @Environment(AppEnvironment.self) private var env
@@ -9,6 +10,9 @@ struct DietChatView: View {
     @State private var messages: [DietChatMessage] = []
     @State private var isSending = false
     @State private var trendSummary = ""
+    @State private var recentGlucose: String?
+    @State private var recentBloodPressure: String?
+    @State private var retainedAgent: (any DietAgentSession)?
 
     var body: some View {
         NavigationStack {
@@ -47,7 +51,7 @@ struct DietChatView: View {
                     Button("关闭") { dismiss() }
                 }
             }
-            .task { await loadTrendSummary() }
+            .task { await prepareSession() }
         }
     }
 
@@ -110,7 +114,17 @@ struct DietChatView: View {
         .background(.ultraThinMaterial)
     }
 
-    private func loadTrendSummary() async {
+    private func prepareSession() async {
+        if #available(iOS 18.0, *) {
+            CSUserQuery.prepare()
+        }
+        if retainedAgent == nil {
+            retainedAgent = DietAgentFactory.make(llm: env.currentLLM())
+        }
+        await loadPersonalContext()
+    }
+
+    private func loadPersonalContext() async {
         let types: [MetricType] = [.sleepHours, .restingHeartRate, .stepCount]
         var parts: [String] = []
         for type in types {
@@ -119,6 +133,18 @@ struct DietChatView: View {
             parts.append("\(type.displayName) z=\(result.zScore.map { String(format: "%.1f", $0) } ?? "n/a")")
         }
         trendSummary = parts.joined(separator: "，")
+        let snapshot = await env.healthProvider.watermarkSnapshot(at: Date())
+        recentGlucose = DietTools.metricSummary(
+            label: "血糖",
+            value: snapshot.bloodGlucose,
+            unit: "mmol/L",
+            source: snapshot.sourceName
+        )
+        recentBloodPressure = DietTools.bloodPressureSummary(
+            systolic: snapshot.bloodPressureSystolic,
+            diastolic: snapshot.bloodPressureDiastolic,
+            source: snapshot.sourceName
+        )
     }
 
     private func send() async {
@@ -132,6 +158,7 @@ struct DietChatView: View {
 
         let profile = env.profile()
         let alerts = (try? env.context.fetch(FetchDescriptor<AlertRecord>())) ?? []
+        let logs = (try? env.context.fetch(FetchDescriptor<DailyLogEntry>())) ?? []
         let context = DietAgentContext(
             profile: profile.desensitizedTags(),
             trendSummary: trendSummary,
@@ -139,10 +166,15 @@ struct DietChatView: View {
             recipes: env.recipes,
             dietRules: env.dietRules,
             guardrailRules: env.rules,
-            history: messages.dropLast().map { ($0.role.rawValue, $0.text) }
+            history: messages.dropLast().map { ($0.role.rawValue, $0.text) },
+            recentDietLogSummary: DietTools.dietLogSummary(entries: logs),
+            recentGlucose: recentGlucose,
+            recentBloodPressure: recentBloodPressure,
+            currentMedicationNames: profile.currentMedicationNames
         )
 
-        let agent = DietAgentFactory.make(llm: env.currentLLM())
+        let agent = retainedAgent ?? DietAgentFactory.make(llm: env.currentLLM())
+        retainedAgent = agent
         do {
             let response = try await agent.respond(to: trimmed, context: context)
             messages.append(
