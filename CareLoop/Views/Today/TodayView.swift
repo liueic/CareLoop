@@ -18,6 +18,12 @@ struct TodayView: View {
         .restingHeartRate, .sleepHours, .stepCount, .bloodPressureSystolic, .bloodGlucose
     ]
 
+    /// 解读页需要取值的附加指标（代谢综合征相关等）。
+    private let insightMetrics: [MetricType] = [
+        .bloodPressureDiastolic, .triglycerides, .hdlCholesterol, .waistCircumference,
+        .sleepREMPercent, .sleepDeepPercent, .afBurden, .cgmTIR
+    ]
+
     var body: some View {
         NavigationStack {
             ScrollView {
@@ -48,6 +54,11 @@ struct TodayView: View {
         let provider = env.healthProvider
         for type in chartMetrics {
             seriesByType[type] = await provider.dailySeries(type, days: 14)
+            if let metric = await provider.metric(type, on: Date()) {
+                todayMetrics[type] = metric
+            }
+        }
+        for type in insightMetrics where todayMetrics[type] == nil {
             if let metric = await provider.metric(type, on: Date()) {
                 todayMetrics[type] = metric
             }
@@ -182,7 +193,7 @@ struct TodayView: View {
 
     private func alertRow(_ alert: AlertRecord) -> some View {
         let color = CareTheme.tierColor(alert.tier)
-        return DisclosureGroup {
+        let content = DisclosureGroup {
             VStack(alignment: .leading, spacing: 8) {
                 labeled("与个人基线相比", alert.baselineDelta)
                 labeled("为什么需要关注", alert.whyItMatters)
@@ -211,6 +222,77 @@ struct TodayView: View {
         .background(
             RoundedRectangle(cornerRadius: CareTheme.smallCornerRadius, style: .continuous)
                 .fill(color.opacity(0.06))
+        )
+        if let destination = insightDestination(for: alert) {
+            return AnyView(
+                VStack(spacing: 6) {
+                    content
+                    NavigationLink {
+                        destination
+                    } label: {
+                        Label("查看指标解读与可视化", systemImage: "chart.xyaxis.line")
+                            .font(.caption.weight(.semibold))
+                            .foregroundStyle(CareTheme.sage)
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 8)
+                            .background(
+                                RoundedRectangle(cornerRadius: CareTheme.smallCornerRadius, style: .continuous)
+                                    .fill(CareTheme.sageSoft)
+                            )
+                    }
+                    .buttonStyle(.plain)
+                }
+            )
+        }
+        return AnyView(content)
+    }
+
+    /// 从告警内容解析出对应指标与数值，生成解读页入口。
+    private func insightDestination(for alert: AlertRecord) -> AnyView? {
+        if alert.title.contains("代谢综合征") || alert.whatChanged.contains("代谢综合征") {
+            return AnyView(MetabolicInsightView(input: metabolicInput()))
+        }
+        for raw in alert.relatedMetricTypes {
+            guard let type = MetricType(rawValue: raw),
+                  let threshold = env.rules.populationThresholds[raw],
+                  let value = extractValue(from: alert.whatChanged) else { continue }
+            let info = MetricThresholdInfo(
+                low: threshold.low,
+                high: threshold.high,
+                unit: threshold.unit,
+                guideline: threshold.guideline
+            )
+            let direction: MetricDeviation.Direction
+            if let high = threshold.high, value >= high {
+                direction = .above
+            } else if let low = threshold.low, value <= low {
+                direction = .below
+            } else {
+                continue
+            }
+            return AnyView(
+                MetricInsightView(
+                    deviation: MetricDeviation(type: type, value: value, direction: direction, threshold: info)
+                )
+            )
+        }
+        return nil
+    }
+
+    private func extractValue(from text: String) -> Double? {
+        guard let range = text.range(of: #"[0-9]+(\.[0-9]+)?"#, options: .regularExpression) else { return nil }
+        return Double(text[range])
+    }
+
+    private func metabolicInput() -> MetabolicSyndromeInput {
+        MetabolicSyndromeInput(
+            waist: todayMetrics[.waistCircumference]?.value,
+            triglycerides: todayMetrics[.triglycerides]?.value,
+            systolic: todayMetrics[.bloodPressureSystolic]?.value,
+            diastolic: todayMetrics[.bloodPressureDiastolic]?.value,
+            fastingGlucose: todayMetrics[.bloodGlucose]?.value,
+            hdl: todayMetrics[.hdlCholesterol]?.value,
+            isFemale: env.profile().biologicalSex == .female
         )
     }
 
