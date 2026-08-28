@@ -114,7 +114,11 @@ struct DietChatView: View {
 
     private func scrollToBottom(_ proxy: ScrollViewProxy) {
         withAnimation {
-            proxy.scrollTo(isThinking ? "thinking" : messages.last?.id, anchor: .bottom)
+            if isThinking {
+                proxy.scrollTo("thinking", anchor: .bottom)
+            } else if let id = messages.last?.id {
+                proxy.scrollTo(id, anchor: .bottom)
+            }
         }
     }
 
@@ -318,6 +322,8 @@ struct DietChatView: View {
 
         // 一般提问：走饮食助手，用安全候选组织回答
         let alerts = (try? env.context.fetch(FetchDescriptor<AlertRecord>())) ?? []
+        let logs = (try? env.context.fetch(FetchDescriptor<DailyLogEntry>())) ?? []
+        let profile = env.profile()
         let context = DietAgentContext(
             profile: tags,
             trendSummary: trendSummary,
@@ -325,9 +331,14 @@ struct DietChatView: View {
             recipes: env.recipes,
             dietRules: env.dietRules,
             guardrailRules: env.rules,
-            history: messages.suffix(6).map { ($0.role == .user ? "user" : "assistant", $0.text) }
+            history: messages.suffix(6).map { ($0.role == .user ? "user" : "assistant", $0.text) },
+            recentDietLogSummary: DietTools.dietLogSummary(entries: logs),
+            recentGlucose: recentGlucose,
+            recentBloodPressure: recentBloodPressure,
+            currentMedicationNames: profile.currentMedicationNames
         )
-        let agent = DietAgentFactory.make(llm: env.currentLLM())
+        let agent = retainedAgent ?? DietAgentFactory.make(llm: env.currentLLM())
+        retainedAgent = agent
         if let response = try? await agent.respond(to: text, context: context) {
             let cited = safeRecipes.filter { response.citedRecipeIDs.contains($0.id) }
             return BaobaoMessage(
@@ -370,56 +381,6 @@ struct DietChatView: View {
             diastolic: snapshot.bloodPressureDiastolic,
             source: snapshot.sourceName
         )
-    }
-
-    private func send() async {
-        let trimmed = input.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !trimmed.isEmpty else { return }
-        input = ""
-        let userMessage = DietChatMessage(role: .user, text: trimmed)
-        messages.append(userMessage)
-        isSending = true
-        defer { isSending = false }
-
-        let profile = env.profile()
-        let alerts = (try? env.context.fetch(FetchDescriptor<AlertRecord>())) ?? []
-        let logs = (try? env.context.fetch(FetchDescriptor<DailyLogEntry>())) ?? []
-        let context = DietAgentContext(
-            profile: profile.desensitizedTags(),
-            trendSummary: trendSummary,
-            todayStatus: TodayStatus.from(alerts: alerts.filter { Calendar.current.isDateInToday($0.createdAt) }).rawValue,
-            recipes: env.recipes,
-            dietRules: env.dietRules,
-            guardrailRules: env.rules,
-            history: messages.dropLast().map { ($0.role.rawValue, $0.text) },
-            recentDietLogSummary: DietTools.dietLogSummary(entries: logs),
-            recentGlucose: recentGlucose,
-            recentBloodPressure: recentBloodPressure,
-            currentMedicationNames: profile.currentMedicationNames
-        )
-
-        let agent = retainedAgent ?? DietAgentFactory.make(llm: env.currentLLM())
-        retainedAgent = agent
-        do {
-            let response = try await agent.respond(to: trimmed, context: context)
-            messages.append(
-                DietChatMessage(
-                    role: .assistant,
-                    text: response.reply,
-                    citedClauseIDs: response.citedClauseIDs,
-                    degraded: response.degraded
-                )
-            )
-        } catch {
-            messages.append(
-                DietChatMessage(
-                    role: .assistant,
-                    text: error.localizedDescription,
-                    citedClauseIDs: [],
-                    degraded: true
-                )
-            )
-        }
     }
 }
 

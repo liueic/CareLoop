@@ -195,7 +195,7 @@ enum FollowUpMode: String, Codable, Sendable {
     case smartSuggested
 }
 
-enum AlertTier: String, Codable, Comparable, Sendable {
+enum AlertTier: String, Codable, Comparable, CaseIterable, Sendable {
     case l1 = "L1"
     case l2 = "L2"
     case l3 = "L3"
