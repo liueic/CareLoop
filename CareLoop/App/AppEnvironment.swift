@@ -30,6 +30,7 @@ final class AppEnvironment {
             Medication.self,
             MedicationIntake.self,
             FollowUp.self,
+            HospitalReport.self,
             AlertRecord.self,
             BaselineSnapshot.self,
             LLMProviderConfig.self,
@@ -288,16 +289,24 @@ enum DemoSeeder {
         }
         let follow = (try? context.fetch(FetchDescriptor<FollowUp>())) ?? []
         if follow.isEmpty, let date = Calendar.current.date(byAdding: .day, value: 12, to: Date()) {
-            context.insert(
-                FollowUp(
-                    mode: .doctorOrdered,
-                    date: date,
-                    department: "心内科",
-                    preparations: ["空腹", "携带近期手帐摘要"],
-                    notes: "医生口头医嘱，已手动记录",
-                    confirmedByUser: true
-                )
+            var components = Calendar.current.dateComponents([.year, .month, .day], from: date)
+            components.hour = 9
+            components.minute = 30
+            let appointment = Calendar.current.date(from: components) ?? date
+            let item = FollowUp(
+                mode: .doctorOrdered,
+                date: appointment,
+                department: "心内科",
+                doctorName: "王医生",
+                hospital: "市第一人民医院",
+                preVisitRestrictions: ["空腹", "检查前勿剧烈运动"],
+                materialsToBring: ["近期化验单", "用药清单", "近期手帐摘要"],
+                notes: "医生口头医嘱，已手动记录",
+                confirmedByUser: true
             )
+            context.insert(item)
+            let allFollowUps = (try? context.fetch(FetchDescriptor<FollowUp>())) ?? [item]
+            NotificationService.syncFollowUpReminders(from: allFollowUps)
         }
         let logs = (try? context.fetch(FetchDescriptor<DailyLogEntry>())) ?? []
         if logs.isEmpty {

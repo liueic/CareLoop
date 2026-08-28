@@ -8,7 +8,6 @@ struct TodayView: View {
     @Query private var medications: [Medication]
     @Query private var intakes: [MedicationIntake]
     @Query(sort: \FollowUp.date) private var followUps: [FollowUp]
-    @Query(sort: \DailyLogEntry.createdAt, order: .reverse) private var logs: [DailyLogEntry]
     @State private var seriesByType: [MetricType: [DailyMetricPoint]] = [:]
     @State private var todayMetrics: [MetricType: HealthMetric] = [:]
     @State private var sleepHours: Double?
@@ -300,35 +299,12 @@ struct TodayView: View {
     // MARK: 复诊 / 检查
 
     private var followCard: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Label("复诊 / 检查", systemImage: "calendar.badge.clock")
-                .font(CareTheme.cardTitle)
-                .foregroundStyle(CareTheme.ink)
-            if let next = followUps.filter({ $0.confirmedByUser }).first {
-                Text("\(next.department) · \(next.date.formatted(date: .abbreviated, time: .omitted))")
-                    .font(CareTheme.body)
-                Text(next.preparations.joined(separator: "、"))
-                    .font(.caption)
-                    .foregroundStyle(CareTheme.muted)
-                Text(FollowUpSummaryService.makeSummary(
-                    profile: env.profile(),
-                    alerts: todayAlerts,
-                    adherence: MedicationEngine.adherence(
-                        intakes: intakes,
-                        expectedSlots: medications.count * 7
-                    ),
-                    logs: logs
-                ))
-                .font(.caption)
-                .foregroundStyle(CareTheme.muted)
-                .lineLimit(4)
-            } else {
-                Text("还没有已确认的复诊。")
-                    .font(CareTheme.body)
-                    .foregroundStyle(CareTheme.muted)
-            }
+        NavigationLink {
+            FollowUpDetailView(followUpID: FollowUpService.nextFollowUp(from: followUps)?.id)
+        } label: {
+            FollowUpSummaryCard(followUp: FollowUpService.nextFollowUp(from: followUps))
         }
-        .careCard()
+        .buttonStyle(CareCardPressStyle())
     }
 
     // MARK: 今日一条行动建议

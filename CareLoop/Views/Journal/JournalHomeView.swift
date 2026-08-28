@@ -6,6 +6,7 @@ struct JournalHomeView: View {
     @Query(sort: \DailyLogEntry.createdAt, order: .reverse) private var entries: [DailyLogEntry]
     @Query private var intakes: [MedicationIntake]
     @Query private var alerts: [AlertRecord]
+    @Query(sort: \FollowUp.date) private var followUps: [FollowUp]
     @State private var showCamera = false
     @State private var showSymptom = false
     @State private var showVoice = false
@@ -18,6 +19,7 @@ struct JournalHomeView: View {
             ScrollView {
                 VStack(alignment: .leading, spacing: CareTheme.sectionSpacing) {
                     header
+                    followUpCard
                     captureDeck
                     heatmapCard
                     weekStrip
@@ -81,6 +83,17 @@ struct JournalHomeView: View {
             }
         }
         .padding(.top, 8)
+    }
+
+    // MARK: 下次复诊
+
+    private var followUpCard: some View {
+        NavigationLink {
+            FollowUpDetailView(followUpID: FollowUpService.nextFollowUp(from: followUps)?.id)
+        } label: {
+            FollowUpSummaryCard(followUp: FollowUpService.nextFollowUp(from: followUps))
+        }
+        .buttonStyle(CareCardPressStyle())
     }
 
     // MARK: 记录入口

@@ -7,17 +7,18 @@ enum FollowUpSummaryService {
         adherence: AdherenceSummary,
         logs: [DailyLogEntry]
     ) -> String {
-        let conditions = profile.conditions.isEmpty ? "未填写" : profile.conditions.joined(separator: "、")
-        let alertText = alerts.prefix(3).map { "\($0.tier.rawValue) \($0.title)" }.joined(separator: "；")
-        let logCount = logs.count
-        return """
-        复诊前健康摘要（非诊断）
-        病种画像：\(conditions)
-        近7日服药打卡：\(adherence.percentText)
-        近期提示：\(alertText.isEmpty ? "暂无" : alertText)
-        手帐条数：\(logCount)
-        \(CareLoopCopy.medicalDisclaimer)
-        """
+        let sections = VisitPackContentBuilder.buildSections(
+            VisitPackInput(
+                followUp: nil,
+                profile: profile,
+                medications: [],
+                alerts: alerts,
+                adherence: adherence,
+                logs: logs,
+                reports: []
+            )
+        )
+        return sections.map { "【\($0.title)】\n\($0.body)" }.joined(separator: "\n\n")
     }
 }
 
