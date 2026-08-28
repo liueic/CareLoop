@@ -7,10 +7,10 @@ final class FollowUp {
     var modeRaw: String
     var date: Date
     var department: String
-    var doctorName: String
-    var hospital: String
-    var preVisitRestrictions: [String]
-    var materialsToBring: [String]
+    var doctorName: String = ""
+    var hospital: String = ""
+    var preVisitRestrictions: [String] = []
+    var materialsToBring: [String] = []
     /// Legacy field kept for migration from older builds.
     var preparations: [String]
     var notes: String

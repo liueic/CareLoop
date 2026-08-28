@@ -23,7 +23,7 @@ final class SpeechService {
     }
 
     func start(onPartial: @escaping @MainActor (String) -> Void) throws {
-        stop()
+        haltRecording()
         audioBuffer = Data()
         let audioSession = AVAudioSession.sharedInstance()
         try audioSession.setCategory(.record, mode: .measurement, options: .duckOthers)
@@ -48,9 +48,7 @@ final class SpeechService {
 
     func stop() async -> String? {
         guard isRecording else { return nil }
-        engine.stop()
-        engine.inputNode.removeTap(onBus: 0)
-        isRecording = false
+        haltRecording()
 
         let recordedData = audioBuffer
         audioBuffer = Data()
@@ -58,6 +56,13 @@ final class SpeechService {
 
         let wavData = encodeWAV(pcmData: recordedData, sampleRate: 16000, channels: 1, bitsPerSample: 16)
         return await transcribe(audioData: wavData, mimeType: "audio/wav", fileName: "recording.wav")
+    }
+
+    private func haltRecording() {
+        guard isRecording else { return }
+        engine.stop()
+        engine.inputNode.removeTap(onBus: 0)
+        isRecording = false
     }
 
     private func transcribe(audioData: Data, mimeType: String, fileName: String) async -> String? {
