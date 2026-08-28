@@ -24,6 +24,14 @@ enum IconCatalog {
         case .bloodGlucose: "drop.fill"
         case .oxygenSaturation: "lungs.fill"
         case .workoutMinutes: "figure.run"
+        case .vo2max: "wind"
+        case .respiratoryRate: "lungs.fill"
+        case .wristTemperatureDeviation: "thermometer.medium"
+        case .cgmTIR, .cgmMean, .hba1c: "drop.fill"
+        case .sleepDeepPercent, .sleepREMPercent: "moon.zzz.fill"
+        case .afBurden: "waveform.path.ecg"
+        case .totalCholesterol, .ldlCholesterol, .hdlCholesterol, .triglycerides: "drop.triangle.fill"
+        case .waistCircumference: "figure.stand"
         }
     }
 
@@ -33,8 +41,13 @@ enum IconCatalog {
         case .restingHeartRate, .heartRate, .hrvSDNN: CareTheme.danger
         case .sleepHours: Color(red: 0.38, green: 0.36, blue: 0.62)
         case .bloodPressureSystolic, .bloodPressureDiastolic: Color(red: 0.60, green: 0.30, blue: 0.50)
-        case .bloodGlucose: Color(red: 0.72, green: 0.48, blue: 0.16)
-        case .bodyMass, .oxygenSaturation: CareTheme.muted
+        case .bloodGlucose, .cgmTIR, .cgmMean, .hba1c: Color(red: 0.72, green: 0.48, blue: 0.16)
+        case .bodyMass, .oxygenSaturation, .respiratoryRate, .waistCircumference: CareTheme.muted
+        case .vo2max, .wristTemperatureDeviation: CareTheme.sage
+        case .sleepDeepPercent, .sleepREMPercent: Color(red: 0.38, green: 0.36, blue: 0.62)
+        case .afBurden: CareTheme.danger
+        case .totalCholesterol, .ldlCholesterol, .hdlCholesterol, .triglycerides:
+            Color(red: 0.60, green: 0.30, blue: 0.50)
         }
     }
 

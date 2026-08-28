@@ -78,6 +78,10 @@ final class HealthKitProvider: HealthDataProviding, @unchecked Sendable {
             return await sleepHours(start: start, end: end)
         case .workoutMinutes:
             return await workoutMinutes(start: start, end: end)
+        case .vo2max, .respiratoryRate, .wristTemperatureDeviation, .cgmTIR, .cgmMean,
+             .sleepDeepPercent, .sleepREMPercent, .afBurden, .hba1c, .totalCholesterol,
+             .ldlCholesterol, .hdlCholesterol, .triglycerides, .waistCircumference:
+            return nil
         }
     }
 

@@ -56,6 +56,18 @@ actor MockHealthProvider: HealthDataProviding {
                     value = late ? 16 : 21
                 case .afBurden:
                     value = late ? 1.5 : 0.0
+                case .hba1c:
+                    value = late ? 6.8 : 5.4
+                case .totalCholesterol:
+                    value = late ? 5.8 : 4.6
+                case .ldlCholesterol:
+                    value = late ? 3.6 : 2.6
+                case .hdlCholesterol:
+                    value = late ? 1.05 : 1.35
+                case .triglycerides:
+                    value = late ? 1.9 : 1.2
+                case .waistCircumference:
+                    value = late ? 88 : 80
                 }
                 points.append(DailyMetricPoint(day: day, value: value, sourceName: "Mock 剧本"))
             }

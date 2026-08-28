@@ -1,0 +1,265 @@
+{
+  "disclaimer": {
+    "id": "GENERAL-DISCLAIMER-001",
+    "text_cn": "本结果为健康管理提示，不构成医学诊断。如有不适请及时就医。",
+    "text_en": "This result is for health management purposes only and does not constitute a medical diagnosis. Please consult a healthcare provider if you have any concerns."
+  },
+  "advice": [
+    {
+      "id": "AD-HTN-101",
+      "disease_category": "hypertension",
+      "risk_levels": [
+        "low_elevated",
+        "medium"
+      ],
+      "title_cn": "生活方式调整",
+      "title_en": "Lifestyle Modification",
+      "text_cn": "建议减少钠盐摄入（每日<5g），增加钾摄入，控制体重，规律运动（每周≥150分钟中等强度），限制饮酒。",
+      "text_en": "Reduce sodium intake (<5g/day), increase potassium, control weight, exercise regularly (≥150 min/week moderate intensity), limit alcohol.",
+      "priority": 10
+    },
+    {
+      "id": "AD-HTN-102",
+      "disease_category": "hypertension",
+      "risk_levels": [
+        "medium",
+        "high"
+      ],
+      "title_cn": "血压监测",
+      "title_en": "Blood Pressure Monitoring",
+      "text_cn": "建议每日早晚各测量一次血压，每次测量2-3遍取平均值，记录测量结果供医生参考。",
+      "text_en": "Measure BP twice daily (morning and evening), take 2-3 readings each time and average, keep records for your doctor.",
+      "priority": 20
+    },
+    {
+      "id": "AD-HTN-103",
+      "disease_category": "hypertension",
+      "risk_levels": [
+        "high",
+        "urgent"
+      ],
+      "title_cn": "就医建议",
+      "title_en": "Medical Consultation",
+      "text_cn": "您的血压明显升高，建议尽快就医。如出现头痛、视力模糊、胸痛等症状，请立即就医。",
+      "text_en": "Your blood pressure is significantly elevated. Please consult a doctor soon. Seek immediate care if you experience headache, blurred vision, or chest pain.",
+      "priority": 30
+    },
+    {
+      "id": "AD-HTN-104",
+      "disease_category": "hypertension",
+      "risk_levels": [
+        "urgent"
+      ],
+      "title_cn": "紧急就医",
+      "title_en": "Emergency Care",
+      "text_cn": "您的血压达到危险水平，请立即就医或拨打急救电话。",
+      "text_en": "Your blood pressure has reached a dangerous level. Seek emergency medical care immediately.",
+      "priority": 40
+    },
+    {
+      "id": "AD-DIA-101",
+      "disease_category": "diabetes",
+      "risk_levels": [
+        "low_elevated",
+        "medium"
+      ],
+      "title_cn": "饮食控制",
+      "title_en": "Dietary Control",
+      "text_cn": "建议控制碳水化合物摄入，选择低升糖指数食物，增加膳食纤维，规律进餐。",
+      "text_en": "Control carbohydrate intake, choose low glycemic index foods, increase dietary fiber, eat regularly.",
+      "priority": 10
+    },
+    {
+      "id": "AD-DIA-102",
+      "disease_category": "diabetes",
+      "risk_levels": [
+        "medium",
+        "high"
+      ],
+      "title_cn": "血糖监测",
+      "title_en": "Blood Glucose Monitoring",
+      "text_cn": "建议定期监测空腹血糖和餐后2小时血糖，记录血糖变化趋势。",
+      "text_en": "Monitor fasting and 2-hour postprandial blood glucose regularly, track trends.",
+      "priority": 20
+    },
+    {
+      "id": "AD-DIA-103",
+      "disease_category": "diabetes",
+      "risk_levels": [
+        "high"
+      ],
+      "title_cn": "就医建议",
+      "title_en": "Medical Consultation",
+      "text_cn": "您的血糖明显偏高，建议尽快就医进行详细检查和治疗方案制定。",
+      "text_en": "Your blood glucose is significantly elevated. Please consult a doctor for detailed examination and treatment planning.",
+      "priority": 30
+    },
+    {
+      "id": "AD-DIA-104",
+      "disease_category": "diabetes",
+      "risk_levels": [
+        "urgent"
+      ],
+      "title_cn": "低血糖警告",
+      "title_en": "Hypoglycemia Warning",
+      "text_cn": "您的血糖过低，请立即补充糖分（如糖水、糖果），如出现意识模糊请立即就医。",
+      "text_en": "Your blood glucose is too low. Consume sugar immediately (sugar water, candy). Seek emergency care if confused.",
+      "priority": 40
+    },
+    {
+      "id": "AD-LIP-101",
+      "disease_category": "dyslipidemia",
+      "risk_levels": [
+        "low_elevated",
+        "medium"
+      ],
+      "title_cn": "饮食调整",
+      "title_en": "Dietary Adjustment",
+      "text_cn": "建议减少饱和脂肪和反式脂肪摄入，增加不饱和脂肪酸（如鱼类、坚果），控制胆固醇摄入。",
+      "text_en": "Reduce saturated and trans fat intake, increase unsaturated fats (fish, nuts), control cholesterol intake.",
+      "priority": 10
+    },
+    {
+      "id": "AD-LIP-102",
+      "disease_category": "dyslipidemia",
+      "risk_levels": [
+        "medium",
+        "high"
+      ],
+      "title_cn": "定期检测",
+      "title_en": "Regular Testing",
+      "text_cn": "建议每3-6个月复查血脂，监测血脂变化趋势。",
+      "text_en": "Recheck blood lipids every 3-6 months to monitor trends.",
+      "priority": 20
+    },
+    {
+      "id": "AD-LIP-103",
+      "disease_category": "dyslipidemia",
+      "risk_levels": [
+        "high"
+      ],
+      "title_cn": "就医建议",
+      "title_en": "Medical Consultation",
+      "text_cn": "您的血脂明显异常，建议尽快就医评估是否需要药物治疗。",
+      "text_en": "Your blood lipids are significantly abnormal. Please consult a doctor to evaluate if medication is needed.",
+      "priority": 30
+    },
+    {
+      "id": "AD-ACT-101",
+      "disease_category": "activity",
+      "risk_levels": [
+        "low_elevated",
+        "medium"
+      ],
+      "title_cn": "增加活动量",
+      "title_en": "Increase Activity",
+      "text_cn": "建议每日步行至少6000步，每周进行至少150分钟中等强度有氧运动（如快走、游泳、骑车）。",
+      "text_en": "Walk at least 6000 steps daily, do at least 150 minutes of moderate aerobic exercise weekly (brisk walking, swimming, cycling).",
+      "priority": 10
+    },
+    {
+      "id": "AD-SLP-101",
+      "disease_category": "sleep",
+      "risk_levels": [
+        "low_elevated",
+        "medium"
+      ],
+      "title_cn": "睡眠改善",
+      "title_en": "Sleep Improvement",
+      "text_cn": "建议保持规律作息，每晚睡眠7-9小时，避免睡前使用电子设备，保持卧室安静黑暗。",
+      "text_en": "Maintain regular sleep schedule, 7-9 hours per night, avoid screens before bed, keep bedroom quiet and dark.",
+      "priority": 10
+    },
+    {
+      "id": "AD-SLP-102",
+      "disease_category": "sleep",
+      "risk_levels": [
+        "medium",
+        "high"
+      ],
+      "title_cn": "睡眠呼吸暂停筛查",
+      "title_en": "Sleep Apnea Screening",
+      "text_cn": "您的睡眠血氧数据提示可能存在睡眠呼吸暂停，建议就医进行专业评估。睡眠呼吸暂停会增加心血管风险。",
+      "text_en": "Your sleep SpO2 data suggests possible sleep apnea. Please consult a doctor for professional evaluation. Sleep apnea increases cardiovascular risk.",
+      "priority": 20
+    },
+    {
+      "id": "AD-TR-101",
+      "disease_category": "hypertension",
+      "risk_levels": [
+        "low_elevated",
+        "medium"
+      ],
+      "title_cn": "持续血压偏高建议",
+      "title_en": "Sustained Elevated BP Advice",
+      "text_cn": "近7天血压均值持续偏高，建议加强生活方式干预，增加测量频率，并记录血压日记供医生参考。如持续2周以上偏高，建议就医评估。",
+      "text_en": "Your 7-day mean BP is persistently elevated. Strengthen lifestyle modifications, increase monitoring frequency, and keep a BP diary. If sustained for over 2 weeks, consult a doctor.",
+      "priority": 15
+    },
+    {
+      "id": "AD-TR-102",
+      "disease_category": "hypertension",
+      "risk_levels": [
+        "medium",
+        "high"
+      ],
+      "title_cn": "晨峰血压管理",
+      "title_en": "Morning Surge Management",
+      "text_cn": "检测到血压晨峰现象（清晨血压明显高于全天均值），这是心血管事件的独立风险因子。建议：1）起床后缓慢活动，避免突然起身；2）将降压药服用时间调整至睡前（需医生指导）；3）清晨避免剧烈运动和寒冷刺激。",
+      "text_en": "Morning BP surge detected (morning BP significantly higher than daily average). This is an independent cardiovascular risk factor. Suggestions: 1) Rise slowly from bed; 2) Consider adjusting medication timing to bedtime (under doctor guidance); 3) Avoid intense exercise and cold exposure in early morning.",
+      "priority": 25
+    },
+    {
+      "id": "AD-TR-103",
+      "disease_category": "diabetes",
+      "risk_levels": [
+        "medium",
+        "high"
+      ],
+      "title_cn": "CGM血糖波动管理",
+      "title_en": "CGM Glucose Variability Management",
+      "text_cn": "连续血糖监测显示血糖波动较大，目标范围内时间（TIR）偏低。建议：1）注意饮食碳水含量和进食时间；2）规律运动有助于稳定血糖；3）与医生讨论是否需要调整治疗方案。",
+      "text_en": "CGM shows high glucose variability with low Time In Range (TIR). Suggestions: 1) Monitor carb intake and meal timing; 2) Regular exercise helps stabilize glucose; 3) Discuss treatment adjustment with your doctor.",
+      "priority": 20
+    },
+    {
+      "id": "AD-CMP-101",
+      "disease_category": "composite",
+      "risk_levels": [
+        "medium",
+        "high"
+      ],
+      "title_cn": "代谢综合征风险",
+      "title_en": "Metabolic Syndrome Risk",
+      "text_cn": "您存在多项代谢异常（如血压、血糖、血脂、腰围），这些指标相互影响，综合增加心血管风险。建议全面评估并综合管理。",
+      "text_en": "You have multiple metabolic abnormalities (BP, glucose, lipids, waist) that interact and compound cardiovascular risk. Comprehensive evaluation and management recommended.",
+      "priority": 20
+    },
+    {
+      "id": "AD-CMP-102",
+      "disease_category": "composite",
+      "risk_levels": [
+        "medium",
+        "high"
+      ],
+      "title_cn": "心血管风险因子管理",
+      "title_en": "Cardiovascular Risk Factor Management",
+      "text_cn": "您存在多项心血管危险因素，建议：1）定期监测血压、血脂、血糖；2）戒烟限酒；3）控制体重（BMI<24，腰围达标）；4）每周≥150分钟中等强度运动；5）低盐低脂饮食。",
+      "text_en": "You have multiple cardiovascular risk factors. Recommendations: 1) Regular monitoring of BP, lipids, glucose; 2) Quit smoking, limit alcohol; 3) Weight control (BMI<24, waist target); 4) ≥150 min/week moderate exercise; 5) Low-salt, low-fat diet.",
+      "priority": 25
+    },
+    {
+      "id": "AD-CMP-103",
+      "disease_category": "composite",
+      "risk_levels": [
+        "high",
+        "urgent"
+      ],
+      "title_cn": "高风险综合管理建议",
+      "title_en": "High-Risk Comprehensive Management",
+      "text_cn": "您的多项指标异常组合提示心血管风险较高，强烈建议尽快就医进行全面评估。医生可能会考虑药物治疗联合生活方式干预。请携带所有检测记录就诊。",
+      "text_en": "Your combination of abnormal indicators suggests high cardiovascular risk. Strongly recommend prompt medical evaluation. Your doctor may consider medication combined with lifestyle intervention. Bring all test records.",
+      "priority": 35
+    }
+  ]
+}

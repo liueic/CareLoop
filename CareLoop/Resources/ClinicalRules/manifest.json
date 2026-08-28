@@ -1,0 +1,21 @@
+{
+  "active_version": "2024.1",
+  "environments": {
+    "production": "2024.1",
+    "staging": "2024.1",
+    "development": "2024.1"
+  },
+  "versions": {
+    "2024.1": {
+      "effective_date": "2024-06-01",
+      "status": "active",
+      "description": "初始版本，包含高血压、糖尿病、血脂异常单点评估、趋势评估及综合评估规则",
+      "disease_categories": [
+        "hypertension",
+        "diabetes",
+        "dyslipidemia",
+        "composite"
+      ]
+    }
+  }
+}

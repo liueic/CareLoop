@@ -111,6 +111,11 @@ enum AlertEngine: Sendable {
     private static func populationThresholdHits(metrics: [HealthMetric], rules: GuidelineRules) -> [PopulationHit] {
         var hits: [PopulationHit] = []
         for metric in metrics {
+            if metric.type == .bloodPressureSystolic
+                || metric.type == .bloodPressureDiastolic
+                || metric.type == .bloodGlucose {
+                continue
+            }
             guard let threshold = rules.populationThresholds[metric.type.rawValue] else { continue }
             if let high = threshold.high, metric.value >= high {
                 hits.append(

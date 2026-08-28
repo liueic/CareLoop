@@ -1,0 +1,469 @@
+{
+  "metrics": {
+    "sbp": {
+      "name_cn": "收缩压",
+      "name_en": "Systolic Blood Pressure",
+      "unit_canonical": "mmHg",
+      "plausible_range": [
+        50,
+        260
+      ],
+      "source_types": [
+        "cuff",
+        "wearable_bp"
+      ],
+      "tags": [
+        "vital",
+        "cardiovascular"
+      ]
+    },
+    "dbp": {
+      "name_cn": "舒张压",
+      "name_en": "Diastolic Blood Pressure",
+      "unit_canonical": "mmHg",
+      "plausible_range": [
+        30,
+        160
+      ],
+      "source_types": [
+        "cuff",
+        "wearable_bp"
+      ],
+      "tags": [
+        "vital",
+        "cardiovascular"
+      ]
+    },
+    "heart_rate": {
+      "name_cn": "心率",
+      "name_en": "Heart Rate",
+      "unit_canonical": "bpm",
+      "plausible_range": [
+        30,
+        220
+      ],
+      "source_types": [
+        "ppg",
+        "ecg",
+        "cuff"
+      ],
+      "tags": [
+        "vital",
+        "cardiovascular"
+      ],
+      "context_tags": [
+        "resting",
+        "active",
+        "sleeping"
+      ]
+    },
+    "spo2": {
+      "name_cn": "血氧饱和度",
+      "name_en": "Blood Oxygen Saturation",
+      "unit_canonical": "percent",
+      "plausible_range": [
+        50,
+        100
+      ],
+      "source_types": [
+        "ppg"
+      ],
+      "tags": [
+        "vital",
+        "respiratory"
+      ],
+      "context_tags": [
+        "daytime",
+        "nighttime"
+      ]
+    },
+    "blood_glucose": {
+      "name_cn": "血糖",
+      "name_en": "Blood Glucose",
+      "unit_canonical": "mmol/L",
+      "plausible_range": [
+        1.0,
+        33.3
+      ],
+      "source_types": [
+        "cgm",
+        "fingerstick",
+        "lab"
+      ],
+      "tags": [
+        "metabolic"
+      ],
+      "context_tags": [
+        "fasting",
+        "postprandial",
+        "random"
+      ],
+      "conversions": [
+        {
+          "from": "mg/dL",
+          "op": "div",
+          "factor": 18.02
+        }
+      ]
+    },
+    "hba1c": {
+      "name_cn": "糖化血红蛋白",
+      "name_en": "Glycated Hemoglobin",
+      "unit_canonical": "percent",
+      "plausible_range": [
+        3.0,
+        20.0
+      ],
+      "source_types": [
+        "lab"
+      ],
+      "tags": [
+        "metabolic"
+      ]
+    },
+    "tc": {
+      "name_cn": "总胆固醇",
+      "name_en": "Total Cholesterol",
+      "unit_canonical": "mmol/L",
+      "plausible_range": [
+        1.0,
+        15.0
+      ],
+      "source_types": [
+        "lab"
+      ],
+      "tags": [
+        "metabolic",
+        "lipid"
+      ],
+      "conversions": [
+        {
+          "from": "mg/dL",
+          "op": "div",
+          "factor": 38.67
+        }
+      ]
+    },
+    "ldl_c": {
+      "name_cn": "低密度脂蛋白胆固醇",
+      "name_en": "LDL Cholesterol",
+      "unit_canonical": "mmol/L",
+      "plausible_range": [
+        0.3,
+        10.0
+      ],
+      "source_types": [
+        "lab"
+      ],
+      "tags": [
+        "metabolic",
+        "lipid"
+      ],
+      "conversions": [
+        {
+          "from": "mg/dL",
+          "op": "div",
+          "factor": 38.67
+        }
+      ]
+    },
+    "hdl_c": {
+      "name_cn": "高密度脂蛋白胆固醇",
+      "name_en": "HDL Cholesterol",
+      "unit_canonical": "mmol/L",
+      "plausible_range": [
+        0.2,
+        5.0
+      ],
+      "source_types": [
+        "lab"
+      ],
+      "tags": [
+        "metabolic",
+        "lipid"
+      ],
+      "conversions": [
+        {
+          "from": "mg/dL",
+          "op": "div",
+          "factor": 38.67
+        }
+      ]
+    },
+    "tg": {
+      "name_cn": "甘油三酯",
+      "name_en": "Triglycerides",
+      "unit_canonical": "mmol/L",
+      "plausible_range": [
+        0.2,
+        20.0
+      ],
+      "source_types": [
+        "lab"
+      ],
+      "tags": [
+        "metabolic",
+        "lipid"
+      ],
+      "conversions": [
+        {
+          "from": "mg/dL",
+          "op": "div",
+          "factor": 88.57
+        }
+      ]
+    },
+    "weight": {
+      "name_cn": "体重",
+      "name_en": "Body Weight",
+      "unit_canonical": "kg",
+      "plausible_range": [
+        20,
+        300
+      ],
+      "source_types": [
+        "scale",
+        "wearable"
+      ],
+      "tags": [
+        "anthropometric"
+      ]
+    },
+    "height": {
+      "name_cn": "身高",
+      "name_en": "Height",
+      "unit_canonical": "cm",
+      "plausible_range": [
+        50,
+        250
+      ],
+      "source_types": [
+        "manual"
+      ],
+      "tags": [
+        "anthropometric"
+      ]
+    },
+    "waist": {
+      "name_cn": "腰围",
+      "name_en": "Waist Circumference",
+      "unit_canonical": "cm",
+      "plausible_range": [
+        40,
+        200
+      ],
+      "source_types": [
+        "manual",
+        "wearable"
+      ],
+      "tags": [
+        "anthropometric"
+      ]
+    },
+    "steps": {
+      "name_cn": "步数",
+      "name_en": "Step Count",
+      "unit_canonical": "count",
+      "plausible_range": [
+        0,
+        100000
+      ],
+      "source_types": [
+        "accelerometer",
+        "wearable"
+      ],
+      "tags": [
+        "activity"
+      ]
+    },
+    "sleep_duration": {
+      "name_cn": "睡眠时长",
+      "name_en": "Sleep Duration",
+      "unit_canonical": "hours",
+      "plausible_range": [
+        0,
+        24
+      ],
+      "source_types": [
+        "wearable"
+      ],
+      "tags": [
+        "sleep"
+      ]
+    },
+    "deep_sleep_ratio": {
+      "name_cn": "深睡比例",
+      "name_en": "Deep Sleep Ratio",
+      "unit_canonical": "percent",
+      "plausible_range": [
+        0,
+        100
+      ],
+      "source_types": [
+        "wearable"
+      ],
+      "tags": [
+        "sleep"
+      ]
+    },
+    "body_temperature": {
+      "name_cn": "体温",
+      "name_en": "Body Temperature",
+      "unit_canonical": "celsius",
+      "plausible_range": [
+        34.0,
+        42.0
+      ],
+      "source_types": [
+        "wearable",
+        "thermometer"
+      ],
+      "tags": [
+        "vital"
+      ]
+    },
+    "resting_heart_rate": {
+      "name_cn": "静息心率",
+      "name_en": "Resting Heart Rate",
+      "unit_canonical": "bpm",
+      "plausible_range": [
+        30,
+        180
+      ],
+      "source_types": [
+        "ppg",
+        "ecg",
+        "cuff"
+      ],
+      "tags": [
+        "vital",
+        "cardiovascular"
+      ],
+      "context_tags": [
+        "resting"
+      ]
+    },
+    "vo2max": {
+      "name_cn": "最大摄氧量",
+      "name_en": "VO2 Max",
+      "unit_canonical": "mL/kg/min",
+      "plausible_range": [
+        10,
+        80
+      ],
+      "source_types": [
+        "wearable"
+      ],
+      "tags": [
+        "fitness",
+        "cardiovascular"
+      ],
+      "device_note": "Apple Watch 平均低估 ~6 mL/kg/min（Lambe 2025）；只看趋势变化"
+    },
+    "respiratory_rate": {
+      "name_cn": "呼吸频率",
+      "name_en": "Respiratory Rate",
+      "unit_canonical": "breaths/min",
+      "plausible_range": [
+        5,
+        40
+      ],
+      "source_types": [
+        "wearable"
+      ],
+      "tags": [
+        "vital",
+        "respiratory"
+      ]
+    },
+    "wrist_temp_amplitude": {
+      "name_cn": "手腕温度偏差",
+      "name_en": "Wrist Temperature Deviation",
+      "unit_canonical": "celsius",
+      "plausible_range": [
+        -5.0,
+        5.0
+      ],
+      "source_types": [
+        "wearable"
+      ],
+      "tags": [
+        "vital",
+        "sleep"
+      ]
+    },
+    "cgm_tir": {
+      "name_cn": "血糖目标范围时间占比",
+      "name_en": "CGM Time in Range",
+      "unit_canonical": "percent",
+      "plausible_range": [
+        0,
+        100
+      ],
+      "source_types": [
+        "cgm"
+      ],
+      "tags": [
+        "metabolic"
+      ],
+      "context_tags": [
+        "fasting",
+        "postprandial"
+      ]
+    },
+    "cgm_mean": {
+      "name_cn": "CGM平均血糖",
+      "name_en": "CGM Mean Glucose",
+      "unit_canonical": "mmol/L",
+      "plausible_range": [
+        1.0,
+        33.3
+      ],
+      "source_types": [
+        "cgm"
+      ],
+      "tags": [
+        "metabolic"
+      ],
+      "conversions": [
+        {
+          "from": "mg/dL",
+          "op": "div",
+          "factor": 18.02
+        }
+      ]
+    },
+    "af_burden": {
+      "name_cn": "房颤负荷",
+      "name_en": "Atrial Fibrillation Burden",
+      "unit_canonical": "percent",
+      "plausible_range": [
+        0,
+        100
+      ],
+      "source_types": [
+        "ecg",
+        "wearable"
+      ],
+      "tags": [
+        "cardiovascular",
+        "rhythm"
+      ]
+    },
+    "rem_sleep_ratio": {
+      "name_cn": "REM睡眠比例",
+      "name_en": "REM Sleep Ratio",
+      "unit_canonical": "percent",
+      "plausible_range": [
+        0,
+        100
+      ],
+      "source_types": [
+        "wearable"
+      ],
+      "tags": [
+        "sleep"
+      ]
+    }
+  }
+}

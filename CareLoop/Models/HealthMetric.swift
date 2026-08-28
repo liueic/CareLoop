@@ -21,6 +21,12 @@ enum MetricType: String, Codable, CaseIterable, Sendable, Identifiable {
     case sleepDeepPercent
     case sleepREMPercent
     case afBurden
+    case hba1c
+    case totalCholesterol
+    case ldlCholesterol
+    case hdlCholesterol
+    case triglycerides
+    case waistCircumference
 
     var id: String { rawValue }
 
@@ -46,6 +52,12 @@ enum MetricType: String, Codable, CaseIterable, Sendable, Identifiable {
         case .sleepDeepPercent: "深睡比例"
         case .sleepREMPercent: "REM比例"
         case .afBurden: "房颤负荷"
+        case .hba1c: "糖化血红蛋白"
+        case .totalCholesterol: "总胆固醇"
+        case .ldlCholesterol: "低密度脂蛋白"
+        case .hdlCholesterol: "高密度脂蛋白"
+        case .triglycerides: "甘油三酯"
+        case .waistCircumference: "腰围"
         }
     }
 
@@ -66,23 +78,26 @@ enum MetricType: String, Codable, CaseIterable, Sendable, Identifiable {
         case .wristTemperatureDeviation: "°C"
         case .cgmTIR: "%"
         case .cgmMean: "mmol/L"
-        case .sleepDeepPercent, .sleepREMPercent, .afBurden: "%"
+        case .sleepDeepPercent, .sleepREMPercent, .afBurden, .hba1c: "%"
+        case .totalCholesterol, .ldlCholesterol, .hdlCholesterol, .triglycerides: "mmol/L"
+        case .waistCircumference: "cm"
         }
     }
 
     var higherIsWorse: Bool {
         switch self {
         case .restingHeartRate, .heartRate, .bloodPressureSystolic, .bloodPressureDiastolic,
-             .bloodGlucose, .cgmMean, .afBurden, .wristTemperatureDeviation:
+             .bloodGlucose, .cgmMean, .afBurden, .wristTemperatureDeviation,
+             .hba1c, .totalCholesterol, .ldlCholesterol, .triglycerides, .waistCircumference:
             true
-        case .vo2max, .cgmTIR, .sleepDeepPercent, .sleepREMPercent:
+        case .vo2max, .cgmTIR, .sleepDeepPercent, .sleepREMPercent, .hdlCholesterol:
             false
         default:
             false
         }
     }
 
-    var ruleEngineKey: String? {
+    var clinicalKey: String? {
         switch self {
         case .restingHeartRate: "resting_heart_rate"
         case .heartRate: "heart_rate"
@@ -101,6 +116,12 @@ enum MetricType: String, Codable, CaseIterable, Sendable, Identifiable {
         case .cgmTIR: "cgm_tir"
         case .cgmMean: "cgm_mean"
         case .afBurden: "af_burden"
+        case .hba1c: "hba1c"
+        case .totalCholesterol: "tc"
+        case .ldlCholesterol: "ldl_c"
+        case .hdlCholesterol: "hdl_c"
+        case .triglycerides: "tg"
+        case .waistCircumference: "waist"
         case .hrvSDNN, .activeEnergy, .workoutMinutes:
             nil
         }
@@ -133,7 +154,7 @@ enum MetricType: String, Codable, CaseIterable, Sendable, Identifiable {
         case .afBurden:
             "Apple Watch AFib 筛查敏感度 93.6%、特异度 97.0%（Apple 2023）"
         default:
-            return nil
+            nil
         }
     }
 }
