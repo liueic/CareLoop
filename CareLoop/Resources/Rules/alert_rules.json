@@ -1,0 +1,12 @@
+{
+  "personalZDeviate": 1.5,
+  "personalZSevere": 2.0,
+  "consecutiveDays": 3,
+  "restingHeartRateHigh": 100,
+  "restingHeartRateLow": 45,
+  "systolic": 140,
+  "diastolic": 90,
+  "glucoseHigh": 10.0,
+  "glucoseLow": 3.9,
+  "sleepShort": 5.5
+}

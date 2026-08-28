@@ -1,0 +1,383 @@
+[
+  {
+    "id": "exercise-001",
+    "name": "快走",
+    "intensityMET": 3.5,
+    "intensityLevel": "低",
+    "avoidFor": [],
+    "requiresEquipment": [],
+    "venue": [
+      "户外",
+      "健身房"
+    ],
+    "defaultDurationMin": 30,
+    "notes": "心率控制在 (170 - 年龄) 以下"
+  },
+  {
+    "id": "exercise-002",
+    "name": "散步",
+    "intensityMET": 2.5,
+    "intensityLevel": "低",
+    "avoidFor": [],
+    "requiresEquipment": [],
+    "venue": [
+      "户外",
+      "室内"
+    ],
+    "defaultDurationMin": 20,
+    "notes": "饭后慢走，步伐舒适"
+  },
+  {
+    "id": "exercise-003",
+    "name": "拉伸",
+    "intensityMET": 2.0,
+    "intensityLevel": "低",
+    "avoidFor": [],
+    "requiresEquipment": [],
+    "venue": [
+      "室内",
+      "户外",
+      "健身房"
+    ],
+    "defaultDurationMin": 15,
+    "notes": "避免弹震拉伸，呼吸均匀"
+  },
+  {
+    "id": "exercise-004",
+    "name": "恢复性瑜伽",
+    "intensityMET": 2.5,
+    "intensityLevel": "低",
+    "avoidFor": [
+      "房颤"
+    ],
+    "requiresEquipment": [
+      "瑜伽垫"
+    ],
+    "venue": [
+      "室内"
+    ],
+    "defaultDurationMin": 20,
+    "notes": "不做倒立与闭气"
+  },
+  {
+    "id": "exercise-005",
+    "name": "坐姿活动",
+    "intensityMET": 1.8,
+    "intensityLevel": "低",
+    "avoidFor": [],
+    "requiresEquipment": [],
+    "venue": [
+      "室内"
+    ],
+    "defaultDurationMin": 10,
+    "notes": "适合精力差或行动受限时"
+  },
+  {
+    "id": "exercise-006",
+    "name": "太极",
+    "intensityMET": 3.0,
+    "intensityLevel": "低",
+    "avoidFor": [],
+    "requiresEquipment": [],
+    "venue": [
+      "户外",
+      "室内"
+    ],
+    "defaultDurationMin": 30,
+    "notes": "动作缓慢，以不头晕为度"
+  },
+  {
+    "id": "exercise-007",
+    "name": "八段锦",
+    "intensityMET": 3.0,
+    "intensityLevel": "低",
+    "avoidFor": [],
+    "requiresEquipment": [],
+    "venue": [
+      "室内",
+      "户外"
+    ],
+    "defaultDurationMin": 20,
+    "notes": "幅度量力，关节不适即停"
+  },
+  {
+    "id": "exercise-008",
+    "name": "骑行（平路）",
+    "intensityMET": 4.5,
+    "intensityLevel": "中",
+    "avoidFor": [
+      "房颤"
+    ],
+    "requiresEquipment": [
+      "自行车"
+    ],
+    "venue": [
+      "户外"
+    ],
+    "defaultDurationMin": 30,
+    "notes": "避免陡坡冲刺"
+  },
+  {
+    "id": "exercise-009",
+    "name": "游泳（轻松）",
+    "intensityMET": 5.0,
+    "intensityLevel": "中",
+    "avoidFor": [],
+    "requiresEquipment": [
+      "泳池"
+    ],
+    "venue": [
+      "健身房"
+    ],
+    "defaultDurationMin": 25,
+    "notes": "以能对话的强度为准"
+  },
+  {
+    "id": "exercise-010",
+    "name": "健身操（低冲击）",
+    "intensityMET": 4.0,
+    "intensityLevel": "中",
+    "avoidFor": [
+      "房颤"
+    ],
+    "requiresEquipment": [],
+    "venue": [
+      "室内",
+      "健身房"
+    ],
+    "defaultDurationMin": 25,
+    "notes": "避免跳跃"
+  },
+  {
+    "id": "exercise-011",
+    "name": "椭圆机",
+    "intensityMET": 5.0,
+    "intensityLevel": "中",
+    "avoidFor": [
+      "房颤"
+    ],
+    "requiresEquipment": [
+      "椭圆机"
+    ],
+    "venue": [
+      "健身房"
+    ],
+    "defaultDurationMin": 20,
+    "notes": "中低阻，不追求配速"
+  },
+  {
+    "id": "exercise-012",
+    "name": "力量训练（轻器械）",
+    "intensityMET": 3.8,
+    "intensityLevel": "中",
+    "avoidFor": [
+      "房颤"
+    ],
+    "requiresEquipment": [
+      "哑铃"
+    ],
+    "venue": [
+      "健身房",
+      "室内"
+    ],
+    "defaultDurationMin": 20,
+    "notes": "避免憋气与大重量"
+  },
+  {
+    "id": "exercise-013",
+    "name": "广场舞（舒缓）",
+    "intensityMET": 4.0,
+    "intensityLevel": "中",
+    "avoidFor": [],
+    "requiresEquipment": [],
+    "venue": [
+      "户外"
+    ],
+    "defaultDurationMin": 30,
+    "notes": "选择慢节奏曲目"
+  },
+  {
+    "id": "exercise-014",
+    "name": "登山（缓坡）",
+    "intensityMET": 5.5,
+    "intensityLevel": "中",
+    "avoidFor": [
+      "房颤",
+      "高血压"
+    ],
+    "requiresEquipment": [],
+    "venue": [
+      "户外"
+    ],
+    "defaultDurationMin": 40,
+    "notes": "高血压用户避免陡坡"
+  },
+  {
+    "id": "exercise-015",
+    "name": "慢跑",
+    "intensityMET": 7.0,
+    "intensityLevel": "高",
+    "avoidFor": [
+      "房颤",
+      "心脏病"
+    ],
+    "requiresEquipment": [],
+    "venue": [
+      "户外",
+      "健身房"
+    ],
+    "defaultDurationMin": 25,
+    "notes": "心脏病/房颤用户不推荐"
+  },
+  {
+    "id": "exercise-016",
+    "name": "HIIT",
+    "intensityMET": 9.0,
+    "intensityLevel": "高",
+    "avoidFor": [
+      "房颤",
+      "心脏病",
+      "高血压"
+    ],
+    "requiresEquipment": [],
+    "venue": [
+      "健身房",
+      "室内"
+    ],
+    "defaultDurationMin": 15,
+    "notes": "高强度间歇，慢病用户默认剔除"
+  },
+  {
+    "id": "exercise-017",
+    "name": "短跑",
+    "intensityMET": 10.0,
+    "intensityLevel": "高",
+    "avoidFor": [
+      "房颤",
+      "心脏病",
+      "高血压"
+    ],
+    "requiresEquipment": [],
+    "venue": [
+      "户外"
+    ],
+    "defaultDurationMin": 10,
+    "notes": "爆发性项目，不推荐心血管慢病"
+  },
+  {
+    "id": "exercise-018",
+    "name": "篮球对抗",
+    "intensityMET": 8.0,
+    "intensityLevel": "高",
+    "avoidFor": [
+      "房颤",
+      "心脏病"
+    ],
+    "requiresEquipment": [
+      "篮球"
+    ],
+    "venue": [
+      "户外",
+      "健身房"
+    ],
+    "defaultDurationMin": 40,
+    "notes": "有冲撞风险"
+  },
+  {
+    "id": "exercise-019",
+    "name": "足球对抗",
+    "intensityMET": 8.5,
+    "intensityLevel": "高",
+    "avoidFor": [
+      "房颤",
+      "心脏病"
+    ],
+    "requiresEquipment": [
+      "足球"
+    ],
+    "venue": [
+      "户外"
+    ],
+    "defaultDurationMin": 40,
+    "notes": "有冲撞风险"
+  },
+  {
+    "id": "exercise-020",
+    "name": "跳绳",
+    "intensityMET": 8.8,
+    "intensityLevel": "高",
+    "avoidFor": [
+      "房颤",
+      "心脏病",
+      "高血压"
+    ],
+    "requiresEquipment": [
+      "跳绳"
+    ],
+    "venue": [
+      "室内",
+      "户外"
+    ],
+    "defaultDurationMin": 10,
+    "notes": "冲击大，慢病用户慎选"
+  },
+  {
+    "id": "exercise-021",
+    "name": "功率自行车冲刺",
+    "intensityMET": 8.5,
+    "intensityLevel": "高",
+    "avoidFor": [
+      "房颤",
+      "心脏病"
+    ],
+    "requiresEquipment": [
+      "动感单车"
+    ],
+    "venue": [
+      "健身房"
+    ],
+    "defaultDurationMin": 15,
+    "notes": "高强度，默认剔除心血管病种"
+  },
+  {
+    "id": "exercise-022",
+    "name": "爬楼梯（慢速）",
+    "intensityMET": 4.0,
+    "intensityLevel": "中",
+    "avoidFor": [
+      "房颤"
+    ],
+    "requiresEquipment": [],
+    "venue": [
+      "室内"
+    ],
+    "defaultDurationMin": 10,
+    "notes": "扶扶手，出现胸闷即停"
+  },
+  {
+    "id": "exercise-023",
+    "name": "园艺活动",
+    "intensityMET": 3.2,
+    "intensityLevel": "低",
+    "avoidFor": [],
+    "requiresEquipment": [],
+    "venue": [
+      "户外"
+    ],
+    "defaultDurationMin": 30,
+    "notes": "避免烈日与过度弯腰"
+  },
+  {
+    "id": "exercise-024",
+    "name": "呼吸放松练习",
+    "intensityMET": 1.5,
+    "intensityLevel": "低",
+    "avoidFor": [],
+    "requiresEquipment": [],
+    "venue": [
+      "室内"
+    ],
+    "defaultDurationMin": 10,
+    "notes": "不适时停止闭气练习"
+  }
+]

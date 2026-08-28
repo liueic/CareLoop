@@ -1,0 +1,5 @@
+{
+  "highIntensityBlockedConditions": ["心房颤动", "心脏病"],
+  "highSugarBlockedConditions": ["糖尿病", "代谢综合征"],
+  "redFlagKeywords": ["胸痛", "严重头晕", "呼吸困难", "昏厥", "晕倒", "吐血", "咯血", "一边肢体无力"]
+}

@@ -1,0 +1,1143 @@
+[
+  {
+    "id": "recipe-001",
+    "name": "清蒸鲈鱼",
+    "cuisine": "粤菜",
+    "spiciness": "none",
+    "tags": [
+      "低盐",
+      "高蛋白",
+      "蒸"
+    ],
+    "ingredients": [
+      "鲈鱼",
+      "姜",
+      "葱"
+    ],
+    "avoidFor": [],
+    "suitableFor": [
+      "高血压",
+      "糖尿病"
+    ],
+    "mealType": [
+      "午餐",
+      "晚餐"
+    ],
+    "cookingNote": "蒸鱼豉油减半或用低钠酱油"
+  },
+  {
+    "id": "recipe-002",
+    "name": "白切鸡配姜葱",
+    "cuisine": "粤菜",
+    "spiciness": "none",
+    "tags": [
+      "高蛋白",
+      "蒸"
+    ],
+    "ingredients": [
+      "鸡",
+      "姜",
+      "葱"
+    ],
+    "avoidFor": [],
+    "suitableFor": [
+      "高血压"
+    ],
+    "mealType": [
+      "午餐",
+      "晚餐"
+    ],
+    "cookingNote": "蘸料少盐"
+  },
+  {
+    "id": "recipe-003",
+    "name": "皮蛋瘦肉粥",
+    "cuisine": "粤菜",
+    "spiciness": "none",
+    "tags": [
+      "易消化",
+      "早餐"
+    ],
+    "ingredients": [
+      "大米",
+      "瘦肉",
+      "皮蛋"
+    ],
+    "avoidFor": [],
+    "suitableFor": [
+      "高血压"
+    ],
+    "mealType": [
+      "早餐"
+    ],
+    "cookingNote": "少放盐，可选无盐"
+  },
+  {
+    "id": "recipe-004",
+    "name": "上汤西兰花",
+    "cuisine": "粤菜",
+    "spiciness": "none",
+    "tags": [
+      "低盐",
+      "蔬菜"
+    ],
+    "ingredients": [
+      "西兰花",
+      "姜"
+    ],
+    "avoidFor": [],
+    "suitableFor": [
+      "高血压",
+      "糖尿病"
+    ],
+    "mealType": [
+      "午餐",
+      "晚餐"
+    ],
+    "cookingNote": "高汤用低钠"
+  },
+  {
+    "id": "recipe-005",
+    "name": "番茄蛋花汤",
+    "cuisine": "粤菜",
+    "spiciness": "none",
+    "tags": [
+      "低盐",
+      "家常"
+    ],
+    "ingredients": [
+      "番茄",
+      "鸡蛋"
+    ],
+    "avoidFor": [],
+    "suitableFor": [
+      "高血压",
+      "糖尿病"
+    ],
+    "mealType": [
+      "午餐",
+      "晚餐"
+    ],
+    "cookingNote": "不放糖"
+  },
+  {
+    "id": "recipe-006",
+    "name": "清炒菜心",
+    "cuisine": "粤菜",
+    "spiciness": "none",
+    "tags": [
+      "低盐",
+      "蔬菜"
+    ],
+    "ingredients": [
+      "菜心",
+      "蒜"
+    ],
+    "avoidFor": [],
+    "suitableFor": [
+      "高血压",
+      "糖尿病"
+    ],
+    "mealType": [
+      "午餐",
+      "晚餐"
+    ],
+    "cookingNote": "少油少盐"
+  },
+  {
+    "id": "recipe-007",
+    "name": "蒸蛋羹",
+    "cuisine": "粤菜",
+    "spiciness": "none",
+    "tags": [
+      "易消化",
+      "高蛋白"
+    ],
+    "ingredients": [
+      "鸡蛋",
+      "温水"
+    ],
+    "avoidFor": [],
+    "suitableFor": [
+      "高血压",
+      "糖尿病"
+    ],
+    "mealType": [
+      "早餐",
+      "午餐"
+    ],
+    "cookingNote": "不额外加盐"
+  },
+  {
+    "id": "recipe-008",
+    "name": "白灼虾",
+    "cuisine": "粤菜",
+    "spiciness": "none",
+    "tags": [
+      "高蛋白",
+      "低脂"
+    ],
+    "ingredients": [
+      "虾",
+      "姜"
+    ],
+    "avoidFor": [
+      "痛风"
+    ],
+    "suitableFor": [
+      "高血压",
+      "糖尿病"
+    ],
+    "mealType": [
+      "午餐",
+      "晚餐"
+    ],
+    "cookingNote": "痛风患者避免"
+  },
+  {
+    "id": "recipe-009",
+    "name": "节瓜粉丝煲",
+    "cuisine": "粤菜",
+    "spiciness": "none",
+    "tags": [
+      "家常",
+      "低盐"
+    ],
+    "ingredients": [
+      "节瓜",
+      "粉丝"
+    ],
+    "avoidFor": [],
+    "suitableFor": [
+      "高血压"
+    ],
+    "mealType": [
+      "午餐",
+      "晚餐"
+    ],
+    "cookingNote": "粉丝适量"
+  },
+  {
+    "id": "recipe-010",
+    "name": "杂粮饭配清炒时蔬",
+    "cuisine": "粤菜",
+    "spiciness": "none",
+    "tags": [
+      "控糖",
+      "粗粮"
+    ],
+    "ingredients": [
+      "糙米",
+      "时蔬"
+    ],
+    "avoidFor": [],
+    "suitableFor": [
+      "糖尿病",
+      "高血压"
+    ],
+    "mealType": [
+      "午餐",
+      "晚餐"
+    ],
+    "cookingNote": "用糙米替代白米"
+  },
+  {
+    "id": "recipe-011",
+    "name": "蒜蓉油麦菜",
+    "cuisine": "粤菜",
+    "spiciness": "none",
+    "tags": [
+      "蔬菜",
+      "快手"
+    ],
+    "ingredients": [
+      "油麦菜",
+      "蒜"
+    ],
+    "avoidFor": [],
+    "suitableFor": [
+      "高血压",
+      "糖尿病"
+    ],
+    "mealType": [
+      "午餐",
+      "晚餐"
+    ],
+    "cookingNote": "少油"
+  },
+  {
+    "id": "recipe-012",
+    "name": "豆腐鱼头汤",
+    "cuisine": "粤菜",
+    "spiciness": "none",
+    "tags": [
+      "高蛋白",
+      "汤"
+    ],
+    "ingredients": [
+      "豆腐",
+      "鱼头",
+      "姜"
+    ],
+    "avoidFor": [
+      "痛风"
+    ],
+    "suitableFor": [
+      "高血压"
+    ],
+    "mealType": [
+      "午餐",
+      "晚餐"
+    ],
+    "cookingNote": "少盐，痛风慎选"
+  },
+  {
+    "id": "recipe-013",
+    "name": "宫保鸡丁（微辣）",
+    "cuisine": "川菜",
+    "spiciness": "mild",
+    "tags": [
+      "家常"
+    ],
+    "ingredients": [
+      "鸡丁",
+      "花生",
+      "干椒"
+    ],
+    "avoidFor": [],
+    "suitableFor": [],
+    "mealType": [
+      "午餐",
+      "晚餐"
+    ],
+    "cookingNote": "减油减盐，微辣版"
+  },
+  {
+    "id": "recipe-014",
+    "name": "麻婆豆腐（微辣）",
+    "cuisine": "川菜",
+    "spiciness": "mild",
+    "tags": [
+      "家常"
+    ],
+    "ingredients": [
+      "豆腐",
+      "牛肉末"
+    ],
+    "avoidFor": [],
+    "suitableFor": [],
+    "mealType": [
+      "午餐",
+      "晚餐"
+    ],
+    "cookingNote": "少油少盐，不放豆瓣过咸版"
+  },
+  {
+    "id": "recipe-015",
+    "name": "蒜泥白肉",
+    "cuisine": "川菜",
+    "spiciness": "mild",
+    "tags": [
+      "高蛋白"
+    ],
+    "ingredients": [
+      "猪肉",
+      "蒜"
+    ],
+    "avoidFor": [],
+    "suitableFor": [],
+    "mealType": [
+      "午餐",
+      "晚餐"
+    ],
+    "cookingNote": "去肥瘦搭配，蘸料少盐"
+  },
+  {
+    "id": "recipe-016",
+    "name": "酸豇豆炒肉末",
+    "cuisine": "川菜",
+    "spiciness": "mild",
+    "tags": [
+      "家常"
+    ],
+    "ingredients": [
+      "酸豇豆",
+      "肉末"
+    ],
+    "avoidFor": [],
+    "suitableFor": [],
+    "mealType": [
+      "午餐"
+    ],
+    "cookingNote": "控盐"
+  },
+  {
+    "id": "recipe-017",
+    "name": "番茄炒蛋（川味微辣）",
+    "cuisine": "川菜",
+    "spiciness": "mild",
+    "tags": [
+      "家常"
+    ],
+    "ingredients": [
+      "番茄",
+      "鸡蛋"
+    ],
+    "avoidFor": [],
+    "suitableFor": [
+      "糖尿病"
+    ],
+    "mealType": [
+      "午餐",
+      "晚餐"
+    ],
+    "cookingNote": "不放糖"
+  },
+  {
+    "id": "recipe-018",
+    "name": "水煮生菜",
+    "cuisine": "川菜",
+    "spiciness": "none",
+    "tags": [
+      "蔬菜",
+      "清淡"
+    ],
+    "ingredients": [
+      "生菜",
+      "蒜"
+    ],
+    "avoidFor": [],
+    "suitableFor": [
+      "高血压",
+      "糖尿病"
+    ],
+    "mealType": [
+      "午餐",
+      "晚餐"
+    ],
+    "cookingNote": "用清汤代替红油"
+  },
+  {
+    "id": "recipe-019",
+    "name": "花椒鸡丝凉面",
+    "cuisine": "川菜",
+    "spiciness": "medium",
+    "tags": [
+      "主食"
+    ],
+    "ingredients": [
+      "鸡肉",
+      "面条",
+      "花椒"
+    ],
+    "avoidFor": [],
+    "suitableFor": [],
+    "mealType": [
+      "午餐"
+    ],
+    "cookingNote": "选全麦面，减油"
+  },
+  {
+    "id": "recipe-020",
+    "name": "回锅肉（减油）",
+    "cuisine": "川菜",
+    "spiciness": "medium",
+    "tags": [
+      "家常"
+    ],
+    "ingredients": [
+      "猪肉",
+      "青椒"
+    ],
+    "avoidFor": [],
+    "suitableFor": [],
+    "mealType": [
+      "午餐",
+      "晚餐"
+    ],
+    "cookingNote": "瘦肉为主，少油"
+  },
+  {
+    "id": "recipe-021",
+    "name": "鱼香茄子（少糖）",
+    "cuisine": "川菜",
+    "spiciness": "mild",
+    "tags": [
+      "家常"
+    ],
+    "ingredients": [
+      "茄子",
+      "肉末"
+    ],
+    "avoidFor": [],
+    "suitableFor": [
+      "糖尿病"
+    ],
+    "mealType": [
+      "午餐",
+      "晚餐"
+    ],
+    "cookingNote": "糖减半或不放"
+  },
+  {
+    "id": "recipe-022",
+    "name": "农家小炒肉",
+    "cuisine": "湘菜",
+    "spiciness": "hot",
+    "tags": [
+      "家常"
+    ],
+    "ingredients": [
+      "猪肉",
+      "辣椒"
+    ],
+    "avoidFor": [],
+    "suitableFor": [],
+    "mealType": [
+      "午餐",
+      "晚餐"
+    ],
+    "cookingNote": "重辣版，高血压建议少盐"
+  },
+  {
+    "id": "recipe-023",
+    "name": "辣椒炒空心菜",
+    "cuisine": "湘菜",
+    "spiciness": "hot",
+    "tags": [
+      "蔬菜"
+    ],
+    "ingredients": [
+      "空心菜",
+      "辣椒"
+    ],
+    "avoidFor": [],
+    "suitableFor": [
+      "糖尿病"
+    ],
+    "mealType": [
+      "午餐",
+      "晚餐"
+    ],
+    "cookingNote": "少油"
+  },
+  {
+    "id": "recipe-024",
+    "name": "剁椒鱼头（少剁椒）",
+    "cuisine": "湘菜",
+    "spiciness": "medium",
+    "tags": [
+      "高蛋白"
+    ],
+    "ingredients": [
+      "鱼头",
+      "剁椒"
+    ],
+    "avoidFor": [
+      "痛风"
+    ],
+    "suitableFor": [],
+    "mealType": [
+      "晚餐"
+    ],
+    "cookingNote": "少剁椒控盐"
+  },
+  {
+    "id": "recipe-025",
+    "name": "蒸湘味豆腐",
+    "cuisine": "湘菜",
+    "spiciness": "mild",
+    "tags": [
+      "高蛋白"
+    ],
+    "ingredients": [
+      "豆腐",
+      "辣椒"
+    ],
+    "avoidFor": [],
+    "suitableFor": [
+      "高血压"
+    ],
+    "mealType": [
+      "午餐",
+      "晚餐"
+    ],
+    "cookingNote": "少咸菜"
+  },
+  {
+    "id": "recipe-026",
+    "name": "紫苏炒河虾",
+    "cuisine": "湘菜",
+    "spiciness": "mild",
+    "tags": [
+      "高蛋白"
+    ],
+    "ingredients": [
+      "河虾",
+      "紫苏"
+    ],
+    "avoidFor": [
+      "痛风"
+    ],
+    "suitableFor": [],
+    "mealType": [
+      "午餐"
+    ],
+    "cookingNote": "痛风避免"
+  },
+  {
+    "id": "recipe-027",
+    "name": "清炒苦瓜",
+    "cuisine": "湘菜",
+    "spiciness": "none",
+    "tags": [
+      "控糖",
+      "蔬菜"
+    ],
+    "ingredients": [
+      "苦瓜",
+      "蒜"
+    ],
+    "avoidFor": [],
+    "suitableFor": [
+      "糖尿病",
+      "高血压"
+    ],
+    "mealType": [
+      "午餐",
+      "晚餐"
+    ],
+    "cookingNote": "少油少盐"
+  },
+  {
+    "id": "recipe-028",
+    "name": "糖醋排骨（少糖）",
+    "cuisine": "江浙",
+    "spiciness": "mild",
+    "tags": [
+      "家常"
+    ],
+    "ingredients": [
+      "排骨",
+      "醋"
+    ],
+    "avoidFor": [],
+    "suitableFor": [],
+    "mealType": [
+      "午餐",
+      "晚餐"
+    ],
+    "cookingNote": "糖显著减少"
+  },
+  {
+    "id": "recipe-029",
+    "name": "清蒸黄鱼",
+    "cuisine": "江浙",
+    "spiciness": "none",
+    "tags": [
+      "高蛋白",
+      "低盐"
+    ],
+    "ingredients": [
+      "黄鱼",
+      "姜",
+      "葱"
+    ],
+    "avoidFor": [],
+    "suitableFor": [
+      "高血压",
+      "糖尿病"
+    ],
+    "mealType": [
+      "午餐",
+      "晚餐"
+    ],
+    "cookingNote": "少酱油"
+  },
+  {
+    "id": "recipe-030",
+    "name": "西湖莼菜汤",
+    "cuisine": "江浙",
+    "spiciness": "none",
+    "tags": [
+      "清淡",
+      "汤"
+    ],
+    "ingredients": [
+      "莼菜",
+      "火腿丝"
+    ],
+    "avoidFor": [],
+    "suitableFor": [
+      "高血压"
+    ],
+    "mealType": [
+      "午餐"
+    ],
+    "cookingNote": "少盐"
+  },
+  {
+    "id": "recipe-031",
+    "name": "干丝拌黄瓜",
+    "cuisine": "江浙",
+    "spiciness": "none",
+    "tags": [
+      "凉菜",
+      "低盐"
+    ],
+    "ingredients": [
+      "豆腐干",
+      "黄瓜"
+    ],
+    "avoidFor": [],
+    "suitableFor": [
+      "高血压",
+      "糖尿病"
+    ],
+    "mealType": [
+      "午餐"
+    ],
+    "cookingNote": "少麻油盐"
+  },
+  {
+    "id": "recipe-032",
+    "name": "清炒杭白菜",
+    "cuisine": "江浙",
+    "spiciness": "none",
+    "tags": [
+      "蔬菜"
+    ],
+    "ingredients": [
+      "杭白菜",
+      "蒜"
+    ],
+    "avoidFor": [],
+    "suitableFor": [
+      "高血压",
+      "糖尿病"
+    ],
+    "mealType": [
+      "午餐",
+      "晚餐"
+    ],
+    "cookingNote": "少油"
+  },
+  {
+    "id": "recipe-033",
+    "name": "笋干老鸭煲（少盐）",
+    "cuisine": "江浙",
+    "spiciness": "none",
+    "tags": [
+      "汤"
+    ],
+    "ingredients": [
+      "鸭",
+      "笋干"
+    ],
+    "avoidFor": [
+      "痛风"
+    ],
+    "suitableFor": [],
+    "mealType": [
+      "晚餐"
+    ],
+    "cookingNote": "撇油少盐"
+  },
+  {
+    "id": "recipe-034",
+    "name": "阳春面加青菜",
+    "cuisine": "江浙",
+    "spiciness": "none",
+    "tags": [
+      "主食",
+      "清淡"
+    ],
+    "ingredients": [
+      "面条",
+      "青菜"
+    ],
+    "avoidFor": [],
+    "suitableFor": [
+      "高血压"
+    ],
+    "mealType": [
+      "早餐",
+      "午餐"
+    ],
+    "cookingNote": "汤底少盐"
+  },
+  {
+    "id": "recipe-035",
+    "name": "西红柿牛腩（少盐）",
+    "cuisine": "北方",
+    "spiciness": "none",
+    "tags": [
+      "高蛋白",
+      "家常"
+    ],
+    "ingredients": [
+      "牛腩",
+      "番茄"
+    ],
+    "avoidFor": [],
+    "suitableFor": [
+      "高血压"
+    ],
+    "mealType": [
+      "午餐",
+      "晚餐"
+    ],
+    "cookingNote": "不放糖少盐"
+  },
+  {
+    "id": "recipe-036",
+    "name": "蒜蓉菠菜",
+    "cuisine": "北方",
+    "spiciness": "none",
+    "tags": [
+      "蔬菜",
+      "铁"
+    ],
+    "ingredients": [
+      "菠菜",
+      "蒜"
+    ],
+    "avoidFor": [],
+    "suitableFor": [
+      "高血压",
+      "糖尿病"
+    ],
+    "mealType": [
+      "午餐",
+      "晚餐"
+    ],
+    "cookingNote": "少油"
+  },
+  {
+    "id": "recipe-037",
+    "name": "葱花鸡蛋饼",
+    "cuisine": "北方",
+    "spiciness": "none",
+    "tags": [
+      "早餐"
+    ],
+    "ingredients": [
+      "鸡蛋",
+      "面粉",
+      "葱"
+    ],
+    "avoidFor": [],
+    "suitableFor": [],
+    "mealType": [
+      "早餐"
+    ],
+    "cookingNote": "可用一半杂粮面粉"
+  },
+  {
+    "id": "recipe-038",
+    "name": "醋溜白菜",
+    "cuisine": "北方",
+    "spiciness": "none",
+    "tags": [
+      "蔬菜",
+      "快手"
+    ],
+    "ingredients": [
+      "白菜",
+      "醋"
+    ],
+    "avoidFor": [],
+    "suitableFor": [
+      "高血压",
+      "糖尿病"
+    ],
+    "mealType": [
+      "午餐",
+      "晚餐"
+    ],
+    "cookingNote": "少糖少盐"
+  },
+  {
+    "id": "recipe-039",
+    "name": "玉米排骨汤",
+    "cuisine": "北方",
+    "spiciness": "none",
+    "tags": [
+      "汤",
+      "家常"
+    ],
+    "ingredients": [
+      "玉米",
+      "排骨"
+    ],
+    "avoidFor": [],
+    "suitableFor": [
+      "高血压"
+    ],
+    "mealType": [
+      "午餐",
+      "晚餐"
+    ],
+    "cookingNote": "撇油少盐"
+  },
+  {
+    "id": "recipe-040",
+    "name": "燕麦牛奶粥",
+    "cuisine": "北方",
+    "spiciness": "none",
+    "tags": [
+      "控糖",
+      "早餐"
+    ],
+    "ingredients": [
+      "燕麦",
+      "牛奶"
+    ],
+    "avoidFor": [],
+    "suitableFor": [
+      "糖尿病",
+      "高血压"
+    ],
+    "mealType": [
+      "早餐"
+    ],
+    "cookingNote": "无糖燕麦"
+  },
+  {
+    "id": "recipe-041",
+    "name": "凉拌木耳黄瓜",
+    "cuisine": "北方",
+    "spiciness": "none",
+    "tags": [
+      "凉菜",
+      "低盐"
+    ],
+    "ingredients": [
+      "木耳",
+      "黄瓜"
+    ],
+    "avoidFor": [],
+    "suitableFor": [
+      "高血压",
+      "糖尿病"
+    ],
+    "mealType": [
+      "午餐"
+    ],
+    "cookingNote": "少盐少油"
+  },
+  {
+    "id": "recipe-042",
+    "name": "清炖鸡汤配杂粮",
+    "cuisine": "北方",
+    "spiciness": "none",
+    "tags": [
+      "高蛋白"
+    ],
+    "ingredients": [
+      "鸡",
+      "杂粮"
+    ],
+    "avoidFor": [],
+    "suitableFor": [
+      "高血压"
+    ],
+    "mealType": [
+      "午餐",
+      "晚餐"
+    ],
+    "cookingNote": "去皮撇油"
+  },
+  {
+    "id": "recipe-043",
+    "name": "南瓜小米粥",
+    "cuisine": "北方",
+    "spiciness": "none",
+    "tags": [
+      "早餐",
+      "温和"
+    ],
+    "ingredients": [
+      "南瓜",
+      "小米"
+    ],
+    "avoidFor": [],
+    "suitableFor": [
+      "高血压"
+    ],
+    "mealType": [
+      "早餐"
+    ],
+    "cookingNote": "不放糖；糖尿病适量"
+  },
+  {
+    "id": "recipe-044",
+    "name": "芹菜香干",
+    "cuisine": "江浙",
+    "spiciness": "none",
+    "tags": [
+      "控盐",
+      "蔬菜"
+    ],
+    "ingredients": [
+      "芹菜",
+      "香干"
+    ],
+    "avoidFor": [],
+    "suitableFor": [
+      "高血压",
+      "糖尿病"
+    ],
+    "mealType": [
+      "午餐",
+      "晚餐"
+    ],
+    "cookingNote": "少盐"
+  },
+  {
+    "id": "recipe-045",
+    "name": "清炒芦笋",
+    "cuisine": "粤菜",
+    "spiciness": "none",
+    "tags": [
+      "低盐",
+      "蔬菜"
+    ],
+    "ingredients": [
+      "芦笋",
+      "蒜"
+    ],
+    "avoidFor": [],
+    "suitableFor": [
+      "高血压",
+      "糖尿病"
+    ],
+    "mealType": [
+      "午餐",
+      "晚餐"
+    ],
+    "cookingNote": "少油"
+  },
+  {
+    "id": "recipe-046",
+    "name": "蒸鸡胸配西兰花",
+    "cuisine": "粤菜",
+    "spiciness": "none",
+    "tags": [
+      "高蛋白",
+      "控糖"
+    ],
+    "ingredients": [
+      "鸡胸",
+      "西兰花"
+    ],
+    "avoidFor": [],
+    "suitableFor": [
+      "糖尿病",
+      "高血压"
+    ],
+    "mealType": [
+      "午餐",
+      "晚餐"
+    ],
+    "cookingNote": "不裹淀粉"
+  },
+  {
+    "id": "recipe-047",
+    "name": "虾仁豆腐蒸蛋",
+    "cuisine": "粤菜",
+    "spiciness": "none",
+    "tags": [
+      "高蛋白",
+      "易消化"
+    ],
+    "ingredients": [
+      "虾仁",
+      "豆腐",
+      "鸡蛋"
+    ],
+    "avoidFor": [
+      "痛风"
+    ],
+    "suitableFor": [
+      "高血压"
+    ],
+    "mealType": [
+      "午餐"
+    ],
+    "cookingNote": "痛风慎选虾仁"
+  },
+  {
+    "id": "recipe-048",
+    "name": "紫菜蛋花汤",
+    "cuisine": "江浙",
+    "spiciness": "none",
+    "tags": [
+      "汤",
+      "快手"
+    ],
+    "ingredients": [
+      "紫菜",
+      "鸡蛋"
+    ],
+    "avoidFor": [],
+    "suitableFor": [
+      "高血压",
+      "糖尿病"
+    ],
+    "mealType": [
+      "午餐",
+      "晚餐"
+    ],
+    "cookingNote": "少盐"
+  },
+  {
+    "id": "recipe-049",
+    "name": "杂蔬鸡胸沙拉",
+    "cuisine": "西式",
+    "spiciness": "none",
+    "tags": [
+      "控糖",
+      "高蛋白"
+    ],
+    "ingredients": [
+      "鸡胸",
+      "生菜",
+      "番茄",
+      "黄瓜"
+    ],
+    "avoidFor": [],
+    "suitableFor": [
+      "糖尿病",
+      "高血压"
+    ],
+    "mealType": [
+      "午餐"
+    ],
+    "cookingNote": "油醋汁少盐"
+  },
+  {
+    "id": "recipe-050",
+    "name": "烤三文鱼配芦笋",
+    "cuisine": "西式",
+    "spiciness": "none",
+    "tags": [
+      "高蛋白",
+      "Omega3"
+    ],
+    "ingredients": [
+      "三文鱼",
+      "芦笋"
+    ],
+    "avoidFor": [
+      "痛风"
+    ],
+    "suitableFor": [
+      "高血压"
+    ],
+    "mealType": [
+      "晚餐"
+    ],
+    "cookingNote": "少盐；痛风适量"
+  }
+]

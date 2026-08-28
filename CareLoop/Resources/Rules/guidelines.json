@@ -1,0 +1,22 @@
+{
+  "version": "0.1",
+  "disclaimer": "规则仅供风险提示与内容过滤，不构成诊断或治疗建议。",
+  "populationThresholds": {
+    "restingHeartRate": { "low": 50, "high": 100, "unit": "count/min", "guideline": "成人静息心率常见参考区间，个体差异大" },
+    "heartRate": { "low": 40, "high": 120, "unit": "count/min", "guideline": "非运动状态下异常心动过速/过缓提示" },
+    "bloodPressureSystolic": { "high": 140, "unit": "mmHg", "guideline": "中国高血压防治指南：收缩压 ≥140 mmHg 为高血压诊断界值之一（需专业复核）" },
+    "bloodPressureDiastolic": { "high": 90, "unit": "mmHg", "guideline": "中国高血压防治指南：舒张压 ≥90 mmHg 为高血压诊断界值之一（需专业复核）" },
+    "bloodGlucose": { "high": 11.1, "unit": "mmol/L", "guideline": "随机血糖显著升高提示需咨询医生，不作诊断" },
+    "sleepHours": { "low": 5.0, "unit": "hr", "guideline": "夜间睡眠时长过短作为观察信号" },
+    "stepCount": { "low": 1500, "unit": "count", "guideline": "活动量骤降结合其他指标观察" }
+  },
+  "redFlagKeywords": ["胸痛", "胸闷压榨", "严重头晕", "晕厥", "意识模糊", "说话不清", "一侧无力", "呼吸困难", "咯血", "剧烈头痛"],
+  "adviceBlacklist": ["停药", "加量", "减量", "换药", "治愈", "确诊", "诊断为", "一定是", "肯定得了", "不用看医生"],
+  "conditionIntensityCeiling": {
+    "高血压": "中",
+    "糖尿病": "中",
+    "房颤": "低",
+    "心脏病": "低"
+  },
+  "highSugarTags": ["含糖饮料", "甜品", "高糖"]
+}

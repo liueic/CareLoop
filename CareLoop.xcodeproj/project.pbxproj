@@ -1,0 +1,539 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXContainerItemProxy section */
+		A1B2C3D4E5F60718293A0043 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = A1B2C3D4E5F60718293A0000 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = A1B2C3D4E5F60718293A0040;
+			remoteInfo = CareLoop;
+		};
+		A1B2C3D4E5F60718293A0045 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = A1B2C3D4E5F60718293A0000 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = A1B2C3D4E5F60718293A0040;
+			remoteInfo = CareLoop;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		A1B2C3D4E5F60718293A0010 /* CareLoop.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = CareLoop.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		A1B2C3D4E5F60718293A0011 /* CareLoopTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = CareLoopTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		A1B2C3D4E5F60718293A0012 /* CareLoopUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = CareLoopUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+/* End PBXFileReference section */
+
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		A1B2C3D4E5F60718293A00E1 /* Exceptions for "CareLoop" folder in "CareLoop" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = A1B2C3D4E5F60718293A0040 /* CareLoop */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
+/* Begin PBXFileSystemSynchronizedRootGroup section */
+		A1B2C3D4E5F60718293A0001 /* CareLoop */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				A1B2C3D4E5F60718293A00E1 /* Exceptions for "CareLoop" folder in "CareLoop" target */,
+			);
+			path = CareLoop;
+			sourceTree = "<group>";
+		};
+		A1B2C3D4E5F60718293A0002 /* CareLoopTests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = CareLoopTests;
+			sourceTree = "<group>";
+		};
+		A1B2C3D4E5F60718293A0003 /* CareLoopUITests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = CareLoopUITests;
+			sourceTree = "<group>";
+		};
+/* End PBXFileSystemSynchronizedRootGroup section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		A1B2C3D4E5F60718293A0020 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		A1B2C3D4E5F60718293A0021 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		A1B2C3D4E5F60718293A0022 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		A1B2C3D4E5F60718293A0030 = {
+			isa = PBXGroup;
+			children = (
+				A1B2C3D4E5F60718293A0001 /* CareLoop */,
+				A1B2C3D4E5F60718293A0002 /* CareLoopTests */,
+				A1B2C3D4E5F60718293A0003 /* CareLoopUITests */,
+				A1B2C3D4E5F60718293A0031 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		A1B2C3D4E5F60718293A0031 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				A1B2C3D4E5F60718293A0010 /* CareLoop.app */,
+				A1B2C3D4E5F60718293A0011 /* CareLoopTests.xctest */,
+				A1B2C3D4E5F60718293A0012 /* CareLoopUITests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		A1B2C3D4E5F60718293A0040 /* CareLoop */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = A1B2C3D4E5F60718293A0060 /* Build configuration list for PBXNativeTarget "CareLoop" */;
+			buildPhases = (
+				A1B2C3D4E5F60718293A0050 /* Sources */,
+				A1B2C3D4E5F60718293A0020 /* Frameworks */,
+				A1B2C3D4E5F60718293A0052 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				A1B2C3D4E5F60718293A0001 /* CareLoop */,
+			);
+			name = CareLoop;
+			packageProductDependencies = (
+			);
+			productName = CareLoop;
+			productReference = A1B2C3D4E5F60718293A0010 /* CareLoop.app */;
+			productType = "com.apple.product-type.application";
+		};
+		A1B2C3D4E5F60718293A0041 /* CareLoopTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = A1B2C3D4E5F60718293A0061 /* Build configuration list for PBXNativeTarget "CareLoopTests" */;
+			buildPhases = (
+				A1B2C3D4E5F60718293A0051 /* Sources */,
+				A1B2C3D4E5F60718293A0021 /* Frameworks */,
+				A1B2C3D4E5F60718293A0053 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				A1B2C3D4E5F60718293A0042 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				A1B2C3D4E5F60718293A0002 /* CareLoopTests */,
+			);
+			name = CareLoopTests;
+			packageProductDependencies = (
+			);
+			productName = CareLoopTests;
+			productReference = A1B2C3D4E5F60718293A0011 /* CareLoopTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		A1B2C3D4E5F60718293A0044 /* CareLoopUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = A1B2C3D4E5F60718293A0062 /* Build configuration list for PBXNativeTarget "CareLoopUITests" */;
+			buildPhases = (
+				A1B2C3D4E5F60718293A0054 /* Sources */,
+				A1B2C3D4E5F60718293A0022 /* Frameworks */,
+				A1B2C3D4E5F60718293A0055 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				A1B2C3D4E5F60718293A0046 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				A1B2C3D4E5F60718293A0003 /* CareLoopUITests */,
+			);
+			name = CareLoopUITests;
+			packageProductDependencies = (
+			);
+			productName = CareLoopUITests;
+			productReference = A1B2C3D4E5F60718293A0012 /* CareLoopUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		A1B2C3D4E5F60718293A0000 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 2600;
+				LastUpgradeCheck = 2600;
+				TargetAttributes = {
+					A1B2C3D4E5F60718293A0040 = {
+						CreatedOnToolsVersion = 26.0;
+					};
+					A1B2C3D4E5F60718293A0041 = {
+						CreatedOnToolsVersion = 26.0;
+						TestTargetID = A1B2C3D4E5F60718293A0040;
+					};
+					A1B2C3D4E5F60718293A0044 = {
+						CreatedOnToolsVersion = 26.0;
+						TestTargetID = A1B2C3D4E5F60718293A0040;
+					};
+				};
+			};
+			buildConfigurationList = A1B2C3D4E5F60718293A0070 /* Build configuration list for PBXProject "CareLoop" */;
+			developmentRegion = "zh-Hans";
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+				"zh-Hans",
+			);
+			mainGroup = A1B2C3D4E5F60718293A0030;
+			minimizedProjectReferenceProxies = 1;
+			preferredProjectObjectVersion = 77;
+			productRefGroup = A1B2C3D4E5F60718293A0031 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				A1B2C3D4E5F60718293A0040 /* CareLoop */,
+				A1B2C3D4E5F60718293A0041 /* CareLoopTests */,
+				A1B2C3D4E5F60718293A0044 /* CareLoopUITests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		A1B2C3D4E5F60718293A0052 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		A1B2C3D4E5F60718293A0053 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		A1B2C3D4E5F60718293A0055 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		A1B2C3D4E5F60718293A0050 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		A1B2C3D4E5F60718293A0051 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		A1B2C3D4E5F60718293A0054 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		A1B2C3D4E5F60718293A0042 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = A1B2C3D4E5F60718293A0040 /* CareLoop */;
+			targetProxy = A1B2C3D4E5F60718293A0043 /* PBXContainerItemProxy */;
+		};
+		A1B2C3D4E5F60718293A0046 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = A1B2C3D4E5F60718293A0040 /* CareLoop */;
+			targetProxy = A1B2C3D4E5F60718293A0045 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		A1B2C3D4E5F60718293A0080 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEVELOPMENT_TEAM = TZ67DXRUY5;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_STRICT_CONCURRENCY = complete;
+				SWIFT_VERSION = 6.0;
+			};
+			name = Debug;
+		};
+		A1B2C3D4E5F60718293A0081 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = TZ67DXRUY5;
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				SDKROOT = iphoneos;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_STRICT_CONCURRENCY = complete;
+				SWIFT_VERSION = 6.0;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		A1B2C3D4E5F60718293A0082 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = CareLoop/CareLoop.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = TZ67DXRUY5;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = CareLoop/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "慢病健康助手";
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.healthcare-fitness";
+				INFOPLIST_KEY_NSCameraUsageDescription = "用于拍摄带健康水印的手帐照片，帮助你低成本记录日常状态。";
+				INFOPLIST_KEY_NSHealthShareUsageDescription = "读取步数、心率、睡眠等健康数据，用于个人基线、水印快照与风险提示。本应用不提供疾病诊断。";
+				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "本应用默认不向健康 App 写入数据。";
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "用于语音速记，并在设备端转写成手帐文字。";
+				INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription = "用于保存带水印的手帐照片。";
+				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "可从相册选择照片写入手帐。";
+				INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "在设备端将语音转成文字，方便补充手帐。语音不会用于诊断。";
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 0.1;
+				PRODUCT_BUNDLE_IDENTIFIER = com.sixthdimension.CareLoop;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Debug;
+		};
+		A1B2C3D4E5F60718293A0083 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = CareLoop/CareLoop.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = TZ67DXRUY5;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = CareLoop/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "慢病健康助手";
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.healthcare-fitness";
+				INFOPLIST_KEY_NSCameraUsageDescription = "用于拍摄带健康水印的手帐照片，帮助你低成本记录日常状态。";
+				INFOPLIST_KEY_NSHealthShareUsageDescription = "读取步数、心率、睡眠等健康数据，用于个人基线、水印快照与风险提示。本应用不提供疾病诊断。";
+				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "本应用默认不向健康 App 写入数据。";
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "用于语音速记，并在设备端转写成手帐文字。";
+				INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription = "用于保存带水印的手帐照片。";
+				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "可从相册选择照片写入手帐。";
+				INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "在设备端将语音转成文字，方便补充手帐。语音不会用于诊断。";
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 0.1;
+				PRODUCT_BUNDLE_IDENTIFIER = com.sixthdimension.CareLoop;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Release;
+		};
+		A1B2C3D4E5F60718293A0084 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = TZ67DXRUY5;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MARKETING_VERSION = 0.1;
+				PRODUCT_BUNDLE_IDENTIFIER = com.sixthdimension.CareLoopTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = 1;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/CareLoop.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/CareLoop";
+			};
+			name = Debug;
+		};
+		A1B2C3D4E5F60718293A0085 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = TZ67DXRUY5;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MARKETING_VERSION = 0.1;
+				PRODUCT_BUNDLE_IDENTIFIER = com.sixthdimension.CareLoopTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = 1;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/CareLoop.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/CareLoop";
+			};
+			name = Release;
+		};
+		A1B2C3D4E5F60718293A0086 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = TZ67DXRUY5;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MARKETING_VERSION = 0.1;
+				PRODUCT_BUNDLE_IDENTIFIER = com.sixthdimension.CareLoopUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = 1;
+				TEST_TARGET_NAME = CareLoop;
+			};
+			name = Debug;
+		};
+		A1B2C3D4E5F60718293A0087 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = TZ67DXRUY5;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MARKETING_VERSION = 0.1;
+				PRODUCT_BUNDLE_IDENTIFIER = com.sixthdimension.CareLoopUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = 1;
+				TEST_TARGET_NAME = CareLoop;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		A1B2C3D4E5F60718293A0060 /* Build configuration list for PBXNativeTarget "CareLoop" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				A1B2C3D4E5F60718293A0082 /* Debug */,
+				A1B2C3D4E5F60718293A0083 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		A1B2C3D4E5F60718293A0061 /* Build configuration list for PBXNativeTarget "CareLoopTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				A1B2C3D4E5F60718293A0084 /* Debug */,
+				A1B2C3D4E5F60718293A0085 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		A1B2C3D4E5F60718293A0062 /* Build configuration list for PBXNativeTarget "CareLoopUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				A1B2C3D4E5F60718293A0086 /* Debug */,
+				A1B2C3D4E5F60718293A0087 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		A1B2C3D4E5F60718293A0070 /* Build configuration list for PBXProject "CareLoop" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				A1B2C3D4E5F60718293A0080 /* Debug */,
+				A1B2C3D4E5F60718293A0081 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = A1B2C3D4E5F60718293A0000 /* Project object */;
+}
