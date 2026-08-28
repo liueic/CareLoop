@@ -8,6 +8,7 @@ struct GuidelineRules: Codable, Sendable {
     var adviceBlacklist: [String]
     var conditionIntensityCeiling: [String: String]
     var highSugarTags: [String]
+    var wearableDeviceNotes: [String: String]?
 
     struct Threshold: Codable, Sendable {
         var low: Double?

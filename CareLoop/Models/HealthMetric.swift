@@ -13,6 +13,14 @@ enum MetricType: String, Codable, CaseIterable, Sendable, Identifiable {
     case bloodGlucose
     case oxygenSaturation
     case workoutMinutes
+    case vo2max
+    case respiratoryRate
+    case wristTemperatureDeviation
+    case cgmTIR
+    case cgmMean
+    case sleepDeepPercent
+    case sleepREMPercent
+    case afBurden
 
     var id: String { rawValue }
 
@@ -30,6 +38,14 @@ enum MetricType: String, Codable, CaseIterable, Sendable, Identifiable {
         case .bloodGlucose: "血糖"
         case .oxygenSaturation: "血氧"
         case .workoutMinutes: "运动时长"
+        case .vo2max: "最大摄氧量"
+        case .respiratoryRate: "呼吸频率"
+        case .wristTemperatureDeviation: "手腕温度偏差"
+        case .cgmTIR: "血糖目标范围时间"
+        case .cgmMean: "平均血糖(CGM)"
+        case .sleepDeepPercent: "深睡比例"
+        case .sleepREMPercent: "REM比例"
+        case .afBurden: "房颤负荷"
         }
     }
 
@@ -45,15 +61,79 @@ enum MetricType: String, Codable, CaseIterable, Sendable, Identifiable {
         case .bloodGlucose: "mmol/L"
         case .oxygenSaturation: "%"
         case .workoutMinutes: "分钟"
+        case .vo2max: "mL/kg/min"
+        case .respiratoryRate: "次/分"
+        case .wristTemperatureDeviation: "°C"
+        case .cgmTIR: "%"
+        case .cgmMean: "mmol/L"
+        case .sleepDeepPercent, .sleepREMPercent, .afBurden: "%"
         }
     }
 
     var higherIsWorse: Bool {
         switch self {
-        case .restingHeartRate, .heartRate, .bloodPressureSystolic, .bloodPressureDiastolic, .bloodGlucose:
+        case .restingHeartRate, .heartRate, .bloodPressureSystolic, .bloodPressureDiastolic,
+             .bloodGlucose, .cgmMean, .afBurden, .wristTemperatureDeviation:
             true
+        case .vo2max, .cgmTIR, .sleepDeepPercent, .sleepREMPercent:
+            false
         default:
             false
+        }
+    }
+
+    var ruleEngineKey: String? {
+        switch self {
+        case .restingHeartRate: "resting_heart_rate"
+        case .heartRate: "heart_rate"
+        case .bloodPressureSystolic: "sbp"
+        case .bloodPressureDiastolic: "dbp"
+        case .bloodGlucose: "blood_glucose"
+        case .oxygenSaturation: "spo2"
+        case .stepCount: "steps"
+        case .sleepHours: "sleep_duration"
+        case .sleepDeepPercent: "deep_sleep_ratio"
+        case .sleepREMPercent: "rem_sleep_ratio"
+        case .bodyMass: "weight"
+        case .vo2max: "vo2max"
+        case .respiratoryRate: "respiratory_rate"
+        case .wristTemperatureDeviation: "wrist_temp_amplitude"
+        case .cgmTIR: "cgm_tir"
+        case .cgmMean: "cgm_mean"
+        case .afBurden: "af_burden"
+        case .hrvSDNN, .activeEnergy, .workoutMinutes:
+            nil
+        }
+    }
+
+    var wearableReferenceNote: String? {
+        switch self {
+        case .restingHeartRate:
+            "95% 健康成人 50–82 bpm（Quer 2020）；单周升高 >10 bpm 值得关注"
+        case .oxygenSaturation:
+            "Apple Watch 健康人偶发 92–94% 多为设备误差（Schröder 2023）；看趋势非单点"
+        case .hrvSDNN:
+            "Apple Watch 系统性低估 ~8 ms，绝对值不用于临床判断，只看个体趋势（O'Grady 2024）"
+        case .sleepHours:
+            "最优区间 6.5–7.5 小时（Quer 2020）；入睡 22:00–22:59 心血管风险最低"
+        case .stepCount:
+            "8,000–9,000 步/天为糖尿病/高血压风险下降平台（Master 2022）"
+        case .vo2max:
+            "Apple Watch 平均低估 ~6 mL/kg/min（Lambe 2025）；只看趋势变化"
+        case .respiratoryRate:
+            "健康成人 12–20 次/分；持续 >20 或 <10 值得关注"
+        case .cgmTIR:
+            "非糖尿病健康人 TIR(70–140 mg/dL) ≥ 96%（CGM-HYPE）"
+        case .cgmMean:
+            "非糖尿病健康人均值约 5.9 mmol/L（CGM-HYPE）"
+        case .sleepDeepPercent:
+            "PSG 实测健康成人深睡约 10–15%（Apple 2023 验证集 12.8%）"
+        case .sleepREMPercent:
+            "PSG 实测健康成人 REM 约 20–25%（Apple 2023 验证集 21.4%）"
+        case .afBurden:
+            "Apple Watch AFib 筛查敏感度 93.6%、特异度 97.0%（Apple 2023）"
+        default:
+            return nil
         }
     }
 }

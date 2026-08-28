@@ -22,6 +22,7 @@ final class AppEnvironment {
     var recipes: [Recipe]
     var exercises: [ExerciseItem]
     var rules: GuidelineRules
+    let ruleEngine: RuleEngineClient
 
     init() {
         let schema = Schema([
@@ -61,6 +62,9 @@ final class AppEnvironment {
         recipes = ContentLibrary.loadRecipes()
         exercises = ContentLibrary.loadExercises()
         rules = GuidelineRules.load()
+        let engineURLString = UserDefaults.standard.string(forKey: "careloop.ruleEngineURL")
+            ?? "http://localhost:8000"
+        ruleEngine = RuleEngineClient(baseURL: URL(string: engineURLString)!)
         refreshProvider()
         ProviderManager(context: container.mainContext).bootstrapIfNeeded()
         DemoSeeder.seedIfNeeded(context: container.mainContext)
@@ -107,7 +111,12 @@ final class AppEnvironment {
         defer { isRefreshing = false }
         let profile = profile()
         let tags = profile.desensitizedTags()
-        let types: [MetricType] = [.sleepHours, .restingHeartRate, .stepCount, .heartRate, .bloodPressureSystolic, .bloodGlucose]
+        let types: [MetricType] = [
+            .sleepHours, .restingHeartRate, .stepCount, .heartRate,
+            .bloodPressureSystolic, .bloodGlucose,
+            .oxygenSaturation, .hrvSDNN, .vo2max, .respiratoryRate,
+            .cgmTIR, .cgmMean, .sleepDeepPercent, .sleepREMPercent, .afBurden,
+        ]
         var baselines: [BaselineResult] = []
         var todayMetrics: [HealthMetric] = []
         for type in types {
@@ -160,6 +169,9 @@ final class AppEnvironment {
                 )
             )
         }
+
+        await integrateRuleEngine(todayMetrics: todayMetrics, profile: profile)
+
         let unwell = symptoms.contains { $0.severity != .mild } || baselines.contains { $0.persistent && $0.metricType == .sleepHours }
         lastAdvice = await AdviceEngine.run(
             input: AdvicePipelineInput(
@@ -178,6 +190,72 @@ final class AppEnvironment {
             rules: rules
         )
         try? context.save()
+    }
+
+    private func integrateRuleEngine(todayMetrics: [HealthMetric], profile: UserProfile) async {
+        var measurements: [String: Double] = [:]
+        for m in todayMetrics {
+            if let key = m.type.ruleEngineKey {
+                measurements[key] = m.value
+            }
+        }
+        guard !measurements.isEmpty else { return }
+
+        let userProfile: [String: Any] = [
+            "age_years": ageYears(from: profile.birthDate),
+            "conditions": profile.conditions,
+        ]
+
+        do {
+            let response = try await ruleEngine.evaluateFull(
+                measurements: measurements,
+                userProfile: userProfile
+            )
+            for (domain, result) in response.domains {
+                for triggered in result.triggered_rules {
+                    let riskTier = alertTier(for: triggered.risk_level)
+                    let evidenceText = triggered.evidence.map { ev in
+                        [ev.guideline, ev.section, ev.quote].compactMap { $0 }.filter { !$0.isEmpty }.joined("；")
+                    }.joined(" | ")
+                    let adviceText = triggered.evidence.first.map { ev in
+                        "指南: \(ev.guideline)\(ev.section.map { " §\($0)" } ?? "")"
+                    } ?? result.summary
+
+                    context.insert(
+                        AlertRecord(
+                            tier: riskTier,
+                            title: "金标准评估: \(domain)",
+                            whatChanged: result.summary,
+                            baselineDelta: triggered.data.map { vals in
+                                vals.map { "\($0.key)=\($0.value)" }.joined(", ")
+                            } ?? "",
+                            whyItMatters: evidenceText.isEmpty ? adviceText : evidenceText,
+                            suggestedAction: result.advice.first?.text ?? "建议咨询医生",
+                            evidence: evidenceText.isEmpty ? adviceText : evidenceText,
+                            relatedMetricTypes: MetricType.allCases.filter { $0.ruleEngineKey == domain },
+                            ruleIDs: [triggered.rule_id]
+                        )
+                    )
+                }
+            }
+        } catch {
+            // Rule engine unreachable — local engines still provide alerts
+        }
+    }
+
+    private func ageYears(from date: Date?) -> Int {
+        guard let date else { return 0 }
+        return Calendar.current.dateComponents([.year], from: date, to: Date()).year ?? 0
+    }
+
+    private func alertTier(for riskLevel: String) -> AlertTier {
+        switch riskLevel {
+        case "urgent": return .l5
+        case "high": return .l4
+        case "medium": return .l3
+        case "low_elevated": return .l2
+        default: return .l1
+        }
     }
 
     private func persistSelection() {

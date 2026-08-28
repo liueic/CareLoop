@@ -1,22 +1,109 @@
 {
-  "version": "0.1",
-  "disclaimer": "规则仅供风险提示与内容过滤，不构成诊断或治疗建议。",
+  "version": "0.2-wearable",
+  "disclaimer": "规则仅供风险提示与内容过滤，不构成诊断或治疗建议。阈值来源：可穿戴设备文献综述（Quer 2020, O'Grady 2024, Schröder 2023, Lambe 2025, CGM-HYPE, Apple 2023 等）。",
   "populationThresholds": {
-    "restingHeartRate": { "low": 50, "high": 100, "unit": "count/min", "guideline": "成人静息心率常见参考区间，个体差异大" },
-    "heartRate": { "low": 40, "high": 120, "unit": "count/min", "guideline": "非运动状态下异常心动过速/过缓提示" },
-    "bloodPressureSystolic": { "high": 140, "unit": "mmHg", "guideline": "中国高血压防治指南：收缩压 ≥140 mmHg 为高血压诊断界值之一（需专业复核）" },
-    "bloodPressureDiastolic": { "high": 90, "unit": "mmHg", "guideline": "中国高血压防治指南：舒张压 ≥90 mmHg 为高血压诊断界值之一（需专业复核）" },
-    "bloodGlucose": { "high": 11.1, "unit": "mmol/L", "guideline": "随机血糖显著升高提示需咨询医生，不作诊断" },
-    "sleepHours": { "low": 5.0, "unit": "hr", "guideline": "夜间睡眠时长过短作为观察信号" },
-    "stepCount": { "low": 1500, "unit": "count", "guideline": "活动量骤降结合其他指标观察" }
+    "restingHeartRate": {
+      "low": 50, "high": 82,
+      "unit": "count/min",
+      "guideline": "95% 健康成人实际落在 50–82 bpm（Quer 2020, N=92,457）；传统 60–100 范围已被可穿戴数据显著收窄。单周升高 >10 bpm 值得关注。"
+    },
+    "heartRate": {
+      "low": 40, "high": 100,
+      "unit": "count/min",
+      "guideline": "非运动状态下静息心率 >82 bpm 已超 95% 健康人群上限；>100 bpm 为明显异常。"
+    },
+    "bloodPressureSystolic": {
+      "high": 140,
+      "unit": "mmHg",
+      "guideline": "中国高血压防治指南：收缩压 ≥140 mmHg 为高血压诊断界值之一。注意：Apple Watch 不直接测血压，灵敏度仅 41%，不可替代袖带式血压计。"
+    },
+    "bloodPressureDiastolic": {
+      "high": 90,
+      "unit": "mmHg",
+      "guideline": "中国高血压防治指南：舒张压 ≥90 mmHg 为高血压诊断界值之一。"
+    },
+    "bloodGlucose": {
+      "high": 11.1,
+      "unit": "mmol/L",
+      "guideline": "随机血糖 ≥11.1 mmol/L 提示需咨询医生（ADA 诊断标准参考），不作诊断。"
+    },
+    "sleepHours": {
+      "low": 6.5, "high": 7.5,
+      "unit": "hr",
+      "guideline": "与最低静息心率/最低心血管风险相关区间 6.5–7.5 小时（Quer 2020）；短于 6.5h 者 MACE HR=1.24。入睡 22:00–22:59 心血管风险最低（Nikbakhtian 2021）。"
+    },
+    "stepCount": {
+      "low": 5000,
+      "unit": "count",
+      "guideline": "<5,000 步/天为久坐型（Tudor-Locke 2011）；<7,500 步 MACE 风险 +52%（Yun 2026）；8,000–9,000 步为糖尿病/高血压风险下降平台（Master 2022）。"
+    },
+    "oxygenSaturation": {
+      "low": 95,
+      "unit": "percent",
+      "guideline": "传统正常范围 95–100%。Apple Watch 健康人中 14% 偶发 <95%，最低 92%，多为设备误差（Schröder 2023）；应看持续趋势而非单次异常值。"
+    },
+    "hrvSDNN": {
+      "low": 20,
+      "unit": "ms",
+      "guideline": "Apple Watch 短期 SDNN 健康年轻人均值约 93 ms（O'Grady 2024）；设备系统性低估 ~8 ms，绝对值不用于临床判断，只看个体趋势变化。"
+    },
+    "vo2max": {
+      "low": 18,
+      "unit": "mL/kg/min",
+      "guideline": "Apple Watch 平均低估 ~6 mL/kg/min（Lambe 2025）；<18（男）或 <15（女）为功能独立性受限阈值。只看个体趋势变化，不与人群绝对值直接比较。"
+    },
+    "respiratoryRate": {
+      "low": 12, "high": 20,
+      "unit": "count/min",
+      "guideline": "健康成人静息呼吸频率 12–20 次/分；持续 >20 或 <10 值得关注。"
+    },
+    "cgmTIR": {
+      "low": 96,
+      "unit": "percent",
+      "guideline": "非糖尿病健康人 TIR(70–140 mg/dL) ≥ 96%，CV < 16%（CGM-HYPE 试验）。低于此值提示血糖波动增大。"
+    },
+    "cgmMean": {
+      "high": 7.0,
+      "unit": "mmol/L",
+      "guideline": "非糖尿病健康人平均血糖约 5.9 mmol/L（CGM-HYPE）；≥7.0 mmol/L 对应约 126 mg/dL，接近空腹血糖受损界值。"
+    },
+    "sleepDeepPercent": {
+      "low": 10,
+      "unit": "percent",
+      "guideline": "PSG 实测健康成人深睡约 10–15%（Apple 2023 验证集 12.8%，Ohayon 2004）；随年龄递减。Apple Watch 系统性低估深睡。"
+    },
+    "sleepREMPercent": {
+      "low": 20,
+      "unit": "percent",
+      "guideline": "PSG 实测健康成人 REM 约 20–25%（Apple 2023 验证集 21.4%，Ohayon 2004）。"
+    },
+    "afBurden": {
+      "high": 1,
+      "unit": "percent",
+      "guideline": "Apple Watch AFib 筛查敏感度 93.6%、特异度 97.0%（Apple 2023）。任何检出应咨询医生确认。"
+    },
+    "wristTemperatureDeviation": {
+      "high": 1.0,
+      "unit": "celsius",
+      "guideline": "手腕温度昼夜节律振幅健康成人约 0.85–1.8°C（Brooks 2023）；Apple Watch 输出相对偏差值。持续偏差 >1°C 提示节律紊乱。"
+    }
   },
   "redFlagKeywords": ["胸痛", "胸闷压榨", "严重头晕", "晕厥", "意识模糊", "说话不清", "一侧无力", "呼吸困难", "咯血", "剧烈头痛"],
   "adviceBlacklist": ["停药", "加量", "减量", "换药", "治愈", "确诊", "诊断为", "一定是", "肯定得了", "不用看医生"],
   "conditionIntensityCeiling": {
     "高血压": "中",
     "糖尿病": "中",
+    "代谢综合征": "中",
     "房颤": "低",
     "心脏病": "低"
   },
-  "highSugarTags": ["含糖饮料", "甜品", "高糖"]
+  "highSugarTags": ["含糖饮料", "甜品", "高糖", "奶茶"],
+  "wearableDeviceNotes": {
+    "bloodPressure": "Apple Watch 不直接测血压，灵敏度仅 41%（Apple 2023），不可替代袖带式血压计",
+    "spo2": "Apple Watch 健康人偶发 92–94% 多为设备误差，看趋势非单点（Schröder 2023）",
+    "hrv": "Apple Watch 系统性低估 ~8 ms，绝对值不用于临床判断（O'Grady 2024）",
+    "vo2max": "Apple Watch 平均低估 ~6 mL/kg/min，只看趋势（Lambe 2025）",
+    "sleepStages": "Apple Watch 低估深睡、高估浅睡（深睡低估 25–43 min），趋势比绝对值更有参考价值",
+    "afScreening": "Apple Watch AFib 筛查敏感度 93.6%、特异度 97.0%（Apple 2023）"
+  }
 }

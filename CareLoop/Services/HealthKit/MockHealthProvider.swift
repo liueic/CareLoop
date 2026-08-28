@@ -40,6 +40,22 @@ actor MockHealthProvider: HealthDataProviding {
                     value = 97
                 case .workoutMinutes:
                     value = late ? 0 : 25
+                case .vo2max:
+                    value = late ? 28 : 35
+                case .respiratoryRate:
+                    value = late ? 18 : 15
+                case .wristTemperatureDeviation:
+                    value = 0.0
+                case .cgmTIR:
+                    value = late ? 88 : 97
+                case .cgmMean:
+                    value = late ? 6.8 : 5.8
+                case .sleepDeepPercent:
+                    value = late ? 8 : 13
+                case .sleepREMPercent:
+                    value = late ? 16 : 21
+                case .afBurden:
+                    value = late ? 1.5 : 0.0
                 }
                 points.append(DailyMetricPoint(day: day, value: value, sourceName: "Mock 剧本"))
             }
