@@ -28,11 +28,77 @@ enum LLMError: Error, LocalizedError, Sendable {
     }
 }
 
+struct LLMToolDefinition: Sendable {
+    var name: String
+    var description: String
+    var parametersJSON: String
+}
+
+struct LLMToolCall: Sendable {
+    var id: String
+    var name: String
+    var argumentsJSON: String
+}
+
+struct LLMChatMessage: Sendable {
+    var role: String
+    var content: String?
+    var toolCallID: String?
+    var toolCalls: [LLMToolCall]
+}
+
+struct LLMConversationRequest: Sendable {
+    var system: String
+    var messages: [LLMChatMessage]
+    var tools: [LLMToolDefinition]
+    var maxTokens: Int?
+}
+
+struct LLMConversationResponse: Sendable {
+    var message: LLMChatMessage
+    var modelID: String
+    var finishReason: String?
+}
+
 protocol LLMProviding: Sendable {
     var supportsVision: Bool { get }
+    var supportsToolCall: Bool { get }
     func complete(prompt: LLMPrompt) async throws -> LLMCompletion
+    func completeConversation(_ request: LLMConversationRequest) async throws -> LLMConversationResponse
     func listModels() async throws -> [String]
     func ping(modelID: String) async throws -> TimeInterval
+}
+
+extension LLMProviding {
+    var supportsToolCall: Bool { false }
+
+    func completeConversation(_ request: LLMConversationRequest) async throws -> LLMConversationResponse {
+        let history = request.messages.map { msg -> String in
+            if msg.role == "tool", let id = msg.toolCallID {
+                return "[tool:\(id)] \(msg.content ?? "")"
+            }
+            if !msg.toolCalls.isEmpty {
+                let calls = msg.toolCalls.map { "\($0.name)(\($0.argumentsJSON))" }.joined(separator: "; ")
+                return "[assistant-tools] \(calls)"
+            }
+            return "[\(msg.role)] \(msg.content ?? "")"
+        }.joined(separator: "\n")
+        let toolHint = request.tools.isEmpty
+            ? ""
+            : "\n可用工具：\(request.tools.map(\.name).joined(separator: ", "))（当前 Provider 不支持 tool loop，请直接回答）"
+        let prompt = LLMPrompt(
+            system: request.system,
+            user: history + toolHint + "\n请输出 JSON：{\"reply\":\"...\",\"citedRecipeIDs\":[],\"citedClauseIDs\":[]}",
+            images: [],
+            maxTokens: request.maxTokens
+        )
+        let completion = try await complete(prompt: prompt)
+        return LLMConversationResponse(
+            message: LLMChatMessage(role: "assistant", content: completion.text, toolCallID: nil, toolCalls: []),
+            modelID: completion.modelID,
+            finishReason: "stop"
+        )
+    }
 }
 
 struct OpenAIChatRequest: Encodable {

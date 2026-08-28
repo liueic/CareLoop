@@ -39,8 +39,10 @@ extension Bundle {
             url(forResource: name, withExtension: "json"),
             url(forResource: name, withExtension: "json", subdirectory: "Content"),
             url(forResource: name, withExtension: "json", subdirectory: "Rules"),
+            url(forResource: name, withExtension: "json", subdirectory: "DietRules"),
             url(forResource: name, withExtension: "json", subdirectory: "Resources/Content"),
             url(forResource: name, withExtension: "json", subdirectory: "Resources/Rules"),
+            url(forResource: name, withExtension: "json", subdirectory: "Resources/DietRules"),
         ]
         if let url = candidates.compactMap({ $0 }).first,
            let data = try? Data(contentsOf: url) {

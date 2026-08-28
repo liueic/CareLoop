@@ -36,6 +36,7 @@ struct AdviceResult: Codable, Hashable, Sendable {
     var title: String
     var body: String
     var citedIDs: [String]
+    var clauseCitationIDs: [String]
     var usedLLM: Bool
     var degraded: Bool
     var disclaimer: String

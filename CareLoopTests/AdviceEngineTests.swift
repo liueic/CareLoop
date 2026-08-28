@@ -41,7 +41,7 @@ struct AdviceEngineTests {
             Recipe(id: "b", name: "水煮牛肉", cuisine: "川菜", spiciness: "hot", tags: [], ingredients: ["牛肉"], avoidFor: [], suitableFor: [], mealType: ["午餐"], cookingNote: ""),
             Recipe(id: "c", name: "白灼虾", cuisine: "粤菜", spiciness: "none", tags: [], ingredients: ["虾"], avoidFor: [], suitableFor: [], mealType: ["午餐"], cookingNote: ""),
         ]
-        let filtered = AdviceEngine.hardFilterRecipes(recipes, profile: heartProfile)
+        let filtered = AdviceEngine.hardFilterRecipes(recipes, profile: heartProfile, dietRules: DietGuidelineRules.load())
         #expect(filtered.map(\.id) == ["a"])
     }
 
@@ -64,7 +64,8 @@ struct AdviceEngineTests {
                 exercises: exercises,
                 trendSummary: "睡眠 z=-2.1",
                 feelingUnwell: true,
-                todayStatus: "值得关注"
+                todayStatus: "值得关注",
+                dietRules: DietGuidelineRules.load()
             ),
             llm: MockLLMProvider(),
             rules: GuidelineRules.load()
@@ -72,6 +73,7 @@ struct AdviceEngineTests {
         #expect(!output.safeExerciseIDs.isEmpty)
         #expect(output.exercise.citedIDs.allSatisfy { output.safeExerciseIDs.contains($0) })
         #expect(output.recipe.body.isEmpty == false)
+        #expect(!output.recipe.clauseCitationIDs.isEmpty || output.recipe.degraded)
     }
 
     @Test func unwellForcesLowIntensity() {

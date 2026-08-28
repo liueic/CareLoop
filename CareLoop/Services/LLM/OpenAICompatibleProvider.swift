@@ -6,38 +6,76 @@ struct OpenAICompatibleProvider: LLMProviding {
     var apiKey: String
     var modelID: String
     var supportsVision: Bool
+    var supportsToolCall: Bool
+
+    init(
+        name: String,
+        baseURL: URL,
+        apiKey: String,
+        modelID: String,
+        supportsVision: Bool,
+        supportsToolCall: Bool = true
+    ) {
+        self.name = name
+        self.baseURL = baseURL
+        self.apiKey = apiKey
+        self.modelID = modelID
+        self.supportsVision = supportsVision
+        self.supportsToolCall = supportsToolCall
+    }
 
     func complete(prompt: LLMPrompt) async throws -> LLMCompletion {
+        let response = try await completeConversation(
+            LLMConversationRequest(
+                system: prompt.system,
+                messages: [LLMChatMessage(role: "user", content: prompt.user, toolCallID: nil, toolCalls: [])],
+                tools: [],
+                maxTokens: prompt.maxTokens
+            )
+        )
+        return LLMCompletion(text: response.message.content ?? "", modelID: response.modelID)
+    }
+
+    func completeConversation(_ request: LLMConversationRequest) async throws -> LLMConversationResponse {
         if apiKey.isEmpty { throw LLMError.missingKey }
-        if !prompt.images.isEmpty && !supportsVision { throw LLMError.visionRequired }
-        var messages: [OpenAIChatRequest.Message] = [
-            .init(role: "system", content: .text(prompt.system)),
-        ]
-        if prompt.images.isEmpty {
-            messages.append(.init(role: "user", content: .text(prompt.user)))
-        } else {
-            var parts: [OpenAIChatRequest.Message.Part] = [
-                .init(type: "text", text: prompt.user, image_url: nil),
-            ]
-            for data in prompt.images {
-                let b64 = data.base64EncodedString()
-                parts.append(
-                    .init(
-                        type: "image_url",
-                        text: nil,
-                        image_url: .init(url: "data:image/jpeg;base64,\(b64)")
+        let payload = OpenAIToolChatRequest(
+            model: modelID,
+            messages: buildMessages(system: request.system, messages: request.messages),
+            tools: request.tools.isEmpty ? nil : request.tools.map { tool in
+                OpenAIToolChatRequest.Tool(
+                    type: "function",
+                    function: .init(
+                        name: tool.name,
+                        description: tool.description,
+                        parameters: tool.parametersJSON
                     )
                 )
-            }
-            messages.append(.init(role: "user", content: .parts(parts)))
-        }
-        let payload = OpenAIChatRequest(model: modelID, messages: messages, max_tokens: prompt.maxTokens ?? 600, temperature: 0.4)
+            },
+            max_tokens: request.maxTokens ?? 700,
+            temperature: 0.35
+        )
         let data = try await post(path: "chat/completions", body: payload)
-        let decoded = try JSONDecoder().decode(OpenAIChatResponse.self, from: data)
-        guard let text = decoded.choices?.first?.message?.content, !text.isEmpty else {
+        let decoded = try JSONDecoder().decode(OpenAIToolChatResponse.self, from: data)
+        guard let choice = decoded.choices?.first, let message = choice.message else {
             throw LLMError.invalidResponse
         }
-        return LLMCompletion(text: text, modelID: modelID)
+        let toolCalls = (message.tool_calls ?? []).map { call in
+            LLMToolCall(
+                id: call.id ?? UUID().uuidString,
+                name: call.function?.name ?? "",
+                argumentsJSON: call.function?.arguments ?? "{}"
+            )
+        }
+        return LLMConversationResponse(
+            message: LLMChatMessage(
+                role: message.role ?? "assistant",
+                content: message.content,
+                toolCallID: nil,
+                toolCalls: toolCalls
+            ),
+            modelID: modelID,
+            finishReason: choice.finish_reason
+        )
     }
 
     func listModels() async throws -> [String] {
@@ -49,14 +87,52 @@ struct OpenAICompatibleProvider: LLMProviding {
 
     func ping(modelID: String) async throws -> TimeInterval {
         let started = Date()
-        let payload = OpenAIChatRequest(
+        let payload = OpenAIToolChatRequest(
             model: modelID,
             messages: [.init(role: "user", content: .text("ping"))],
+            tools: nil,
             max_tokens: 1,
             temperature: 0
         )
         _ = try await post(path: "chat/completions", body: payload)
         return Date().timeIntervalSince(started)
+    }
+
+    private func buildMessages(system: String, messages: [LLMChatMessage]) -> [OpenAIToolChatRequest.Message] {
+        var built: [OpenAIToolChatRequest.Message] = [.init(role: "system", content: .text(system))]
+        for message in messages {
+            switch message.role {
+            case "tool":
+                built.append(
+                    .init(
+                        role: "tool",
+                        content: .text(message.content ?? ""),
+                        tool_call_id: message.toolCallID
+                    )
+                )
+            case "assistant":
+                if message.toolCalls.isEmpty {
+                    built.append(.init(role: "assistant", content: .text(message.content ?? "")))
+                } else {
+                    built.append(
+                        .init(
+                            role: "assistant",
+                            content: message.content.map { .text($0) },
+                            tool_calls: message.toolCalls.map { call in
+                                .init(
+                                    id: call.id,
+                                    type: "function",
+                                    function: .init(name: call.name, arguments: call.argumentsJSON)
+                                )
+                            }
+                        )
+                    )
+                }
+            default:
+                built.append(.init(role: message.role, content: .text(message.content ?? "")))
+            }
+        }
+        return built
     }
 
     private func post<Body: Encodable>(path: String, body: Body) async throws -> Data {
@@ -76,7 +152,7 @@ struct OpenAICompatibleProvider: LLMProviding {
         let root = baseURL.absoluteString.trimmingCharacters(in: CharacterSet(charactersIn: "/"))
         guard let url = URL(string: "\(root)/\(path)") else { throw LLMError.network("无效的 Base URL") }
         var request = URLRequest(url: url)
-        request.timeoutInterval = 20
+        request.timeoutInterval = 30
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         if !apiKey.isEmpty {
             request.setValue("Bearer \(apiKey)", forHTTPHeaderField: "Authorization")
@@ -96,6 +172,124 @@ struct OpenAICompatibleProvider: LLMProviding {
             throw error
         } catch {
             throw LLMError.network(error.localizedDescription)
+        }
+    }
+}
+
+private struct OpenAIToolChatRequest: Encodable {
+    var model: String
+    var messages: [Message]
+    var tools: [Tool]?
+    var max_tokens: Int
+    var temperature: Double
+
+    struct Tool: Encodable {
+        var type: String
+        var function: Function
+
+        struct Function: Encodable {
+            var name: String
+            var description: String
+            var parameters: String
+
+            func encode(to encoder: Encoder) throws {
+                var container = encoder.container(keyedBy: CodingKeys.self)
+                try container.encode(name, forKey: .name)
+                try container.encode(description, forKey: .description)
+                if let data = parameters.data(using: .utf8),
+                   let object = try? JSONSerialization.jsonObject(with: data) {
+                    try container.encode(AnyEncodable(object), forKey: .parameters)
+                } else {
+                    try container.encode(["type": "object"], forKey: .parameters)
+                }
+            }
+
+            enum CodingKeys: String, CodingKey {
+                case name, description, parameters
+            }
+        }
+    }
+
+    struct Message: Encodable {
+        var role: String
+        var content: Content?
+        var tool_call_id: String?
+        var tool_calls: [ToolCall]?
+
+        enum Content: Encodable {
+            case text(String)
+
+            func encode(to encoder: Encoder) throws {
+                var container = encoder.singleValueContainer()
+                switch self {
+                case .text(let text):
+                    try container.encode(text)
+                }
+            }
+        }
+
+        struct ToolCall: Encodable {
+            var id: String
+            var type: String
+            var function: FunctionCall
+
+            struct FunctionCall: Encodable {
+                var name: String
+                var arguments: String
+            }
+        }
+    }
+}
+
+private struct OpenAIToolChatResponse: Decodable {
+    var choices: [Choice]?
+
+    struct Choice: Decodable {
+        var message: Message?
+        var finish_reason: String?
+
+        struct Message: Decodable {
+            var role: String?
+            var content: String?
+            var tool_calls: [ToolCall]?
+
+            struct ToolCall: Decodable {
+                var id: String?
+                var function: Function?
+
+                struct Function: Decodable {
+                    var name: String?
+                    var arguments: String?
+                }
+            }
+        }
+    }
+}
+
+private struct AnyEncodable: Encodable {
+    let value: Any
+
+    init(_ value: Any) {
+        self.value = value
+    }
+
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.singleValueContainer()
+        switch value {
+        case let value as String:
+            try container.encode(value)
+        case let value as Int:
+            try container.encode(value)
+        case let value as Double:
+            try container.encode(value)
+        case let value as Bool:
+            try container.encode(value)
+        case let value as [String: Any]:
+            try container.encode(value.mapValues(AnyEncodable.init))
+        case let value as [Any]:
+            try container.encode(value.map(AnyEncodable.init))
+        default:
+            try container.encode(String(describing: value))
         }
     }
 }

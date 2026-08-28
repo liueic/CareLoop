@@ -12,6 +12,7 @@ struct TodayView: View {
     @State private var todayMetrics: [MetricType: HealthMetric] = [:]
     @State private var sleepHours: Double?
     @State private var selectedMetric: MetricType = .restingHeartRate
+    @State private var showDietChat = false
 
     /// 趋势图可切换的指标，按病种相关度排序。
     private let chartMetrics: [MetricType] = [
@@ -41,6 +42,9 @@ struct TodayView: View {
             .background(CareTheme.paper.ignoresSafeArea())
             .navigationTitle("今日")
             .task { await loadMetrics() }
+            .sheet(isPresented: $showDietChat) {
+                DietChatView()
+            }
         }
     }
 
@@ -393,11 +397,17 @@ struct TodayView: View {
 
     private var adviceCard: some View {
         VStack(alignment: .leading, spacing: 10) {
-            Label("今日一条行动建议", systemImage: "lightbulb.fill")
-                .font(CareTheme.cardTitle)
-                .foregroundStyle(CareTheme.ink)
+            HStack {
+                Label("今日一条行动建议", systemImage: "lightbulb.fill")
+                    .font(CareTheme.cardTitle)
+                    .foregroundStyle(CareTheme.ink)
+                Spacer()
+                Button("饮食问一问") { showDietChat = true }
+                    .font(.caption.bold())
+            }
             if let advice = env.lastAdvice {
                 adviceBlock(icon: "fork.knife", title: advice.recipe.title, body: advice.recipe.body)
+                dietClauseFootnotes(for: advice.recipe.clauseCitationIDs)
                 Divider()
                 adviceBlock(icon: "figure.walk", title: advice.exercise.title, body: advice.exercise.body)
                 Text(advice.recipe.disclaimer)
@@ -415,6 +425,22 @@ struct TodayView: View {
             }
         }
         .careCard()
+    }
+
+    private func dietClauseFootnotes(for ids: [String]) -> some View {
+        let clauses = env.dietRules.clauses(withIDs: ids)
+        return Group {
+            if !clauses.isEmpty {
+                VStack(alignment: .leading, spacing: 4) {
+                    ForEach(clauses) { clause in
+                        Text("依据：\(clause.title)")
+                            .font(.caption2)
+                            .foregroundStyle(CareTheme.muted)
+                    }
+                }
+                .padding(.leading, 32)
+            }
+        }
     }
 
     private func adviceBlock(icon: String, title: String, body: String) -> some View {

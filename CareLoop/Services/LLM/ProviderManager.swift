@@ -94,7 +94,8 @@ final class ProviderManager {
             baseURL: url,
             apiKey: secret,
             modelID: selection.modelID,
-            supportsVision: model?.supportsVision ?? false
+            supportsVision: model?.supportsVision ?? false,
+            supportsToolCall: model?.supportsToolCall ?? true
         )
     }
 }

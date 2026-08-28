@@ -22,6 +22,7 @@ final class AppEnvironment {
     var recipes: [Recipe]
     var exercises: [ExerciseItem]
     var rules: GuidelineRules
+    var dietRules: DietGuidelineRules
 
     init() {
         let schema = Schema([
@@ -62,6 +63,8 @@ final class AppEnvironment {
         recipes = ContentLibrary.loadRecipes()
         exercises = ContentLibrary.loadExercises()
         rules = GuidelineRules.load()
+        dietRules = DietGuidelineRules.load()
+        DietSpotlightIndexer.reindex(recipes: recipes, dietRules: dietRules)
         refreshProvider()
         ProviderManager(context: container.mainContext).bootstrapIfNeeded()
         DemoSeeder.seedIfNeeded(context: container.mainContext)
@@ -198,7 +201,8 @@ final class AppEnvironment {
                 feelingUnwell: unwell,
                 todayStatus: TodayStatus.from(
                     alerts: (try? context.fetch(FetchDescriptor<AlertRecord>())) ?? []
-                ).rawValue
+                ).rawValue,
+                dietRules: dietRules
             ),
             llm: currentLLM(),
             rules: rules

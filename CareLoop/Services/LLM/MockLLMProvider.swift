@@ -2,6 +2,7 @@ import Foundation
 
 struct MockLLMProvider: LLMProviding {
     var supportsVision: Bool { true }
+    var supportsToolCall: Bool { true }
 
     func complete(prompt: LLMPrompt) async throws -> LLMCompletion {
         if prompt.user.contains("OCR 提取的文本") || prompt.system.contains("医疗文档") {
@@ -9,6 +10,9 @@ struct MockLLMProvider: LLMProviding {
         }
         if prompt.user.contains("饮食照片") || prompt.system.contains("食物") {
             return foodResponse()
+        }
+        if prompt.system.contains("慢病日常饮食助手") || prompt.user.contains("citedRecipeIDs") {
+            return dietAgentResponse(prompt: prompt)
         }
         let ids = prompt.user
             .split(separator: "\n")
@@ -26,15 +30,78 @@ struct MockLLMProvider: LLMProviding {
         } else {
             body = "建议从候选中选择 \(names)，保持能够对话的强度。出现胸痛或严重不适请停止并就医。"
         }
+        let clauseIDs = prompt.user.contains("饮食") ? "[\"CL-GEN-101\"]" : "[]"
         let json = """
-        {"title":"本地模板建议","body":"\(body)","citedIDs":\(jsonArray(cited))}
+        {"title":"本地模板建议","body":"\(body)","citedIDs":\(jsonArray(cited)),"citedClauseIDs":\(clauseIDs)}
         """
         return LLMCompletion(text: json, modelID: "mock-template")
+    }
+
+    func completeConversation(_ request: LLMConversationRequest) async throws -> LLMConversationResponse {
+        if request.tools.isEmpty {
+            let completion = try await complete(
+                prompt: LLMPrompt(
+                    system: request.system,
+                    user: request.messages.last?.content ?? "",
+                    images: [],
+                    maxTokens: request.maxTokens
+                )
+            )
+            return LLMConversationResponse(
+                message: LLMChatMessage(role: "assistant", content: completion.text, toolCallID: nil, toolCalls: []),
+                modelID: completion.modelID,
+                finishReason: "stop"
+            )
+        }
+
+        let needsProfile = request.messages.last?.content?.contains("画像") == true
+            || request.messages.last?.content?.contains("今晚") == true
+        if needsProfile, request.messages.filter({ $0.role == "tool" }).isEmpty {
+            return LLMConversationResponse(
+                message: LLMChatMessage(
+                    role: "assistant",
+                    content: nil,
+                    toolCallID: nil,
+                    toolCalls: [
+                        LLMToolCall(id: "call_1", name: "get_profile_and_status", argumentsJSON: "{}"),
+                        LLMToolCall(id: "call_2", name: "filter_safe_recipes", argumentsJSON: "{\"limit\":8}"),
+                    ]
+                ),
+                modelID: "mock-template",
+                finishReason: "tool_calls"
+            )
+        }
+
+        let completion = try await complete(
+            prompt: LLMPrompt(
+                system: request.system,
+                user: request.messages.map { $0.content ?? "" }.joined(separator: "\n"),
+                images: [],
+                maxTokens: request.maxTokens
+            )
+        )
+        return LLMConversationResponse(
+            message: LLMChatMessage(role: "assistant", content: completion.text, toolCallID: nil, toolCalls: []),
+            modelID: completion.modelID,
+            finishReason: "stop"
+        )
     }
 
     func listModels() async throws -> [String] { ["mock-template"] }
 
     func ping(modelID: String) async throws -> TimeInterval { 0.05 }
+
+    private func dietAgentResponse(prompt: LLMPrompt) -> LLMCompletion {
+        let recipeID = prompt.user.split(separator: "\n").compactMap { line -> String? in
+            guard let range = line.range(of: "recipe-") else { return nil }
+            let fragment = line[range.lowerBound...]
+            return fragment.split(whereSeparator: { $0 == "\"" || $0 == "," || $0 == " " }).first.map(String.init)
+        }.first ?? "recipe-001"
+        let json = """
+        {"reply":"从安全候选中推荐清淡少盐菜肴，份量适中。如有不适请咨询医生。","citedRecipeIDs":["\(recipeID)"],"citedClauseIDs":["CL-HTN-101"]}
+        """
+        return LLMCompletion(text: json, modelID: "mock-template")
+    }
 
     private func foodResponse() -> LLMCompletion {
         let json = """
