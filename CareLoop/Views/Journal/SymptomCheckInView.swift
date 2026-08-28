@@ -62,19 +62,32 @@ struct VoiceNoteView: View {
     @State private var service = SpeechService()
     @State private var text = ""
     @State private var recording = false
+    @State private var transcribing = false
 
     var body: some View {
         NavigationStack {
             VStack(spacing: 16) {
-                Text(text.isEmpty ? "按住说，松手转写。也可以直接打字。" : text)
+                Text(transcribing ? "转写中…" : text.isEmpty ? "点击开始说话，松手后自动转写。也可以直接打字。" : text)
                     .frame(maxWidth: .infinity, minHeight: 160, alignment: .topLeading)
                     .padding()
                     .background(RoundedRectangle(cornerRadius: 16).fill(Color.white))
                 TextField("手动补充", text: $text, axis: .vertical)
-                Button(recording ? "停止并转写" : "开始说话") {
+                Button {
                     Task { await toggle() }
+                } label: {
+                    if recording {
+                        Text("停止并转写")
+                    } else if transcribing {
+                        HStack(spacing: 6) {
+                            ProgressView().controlSize(.small)
+                            Text("转写中…")
+                        }
+                    } else {
+                        Text("开始说话")
+                    }
                 }
                 .buttonStyle(.borderedProminent)
+                .disabled(transcribing)
                 DisclaimerBanner(compact: true)
                 Spacer()
             }
@@ -85,25 +98,30 @@ struct VoiceNoteView: View {
                 ToolbarItem(placement: .cancellationAction) { Button("关闭") { dismiss() } }
                 ToolbarItem(placement: .confirmationAction) { Button("保存") { save() } }
             }
+            .onAppear {
+                let creds = env.currentProviderCredentials()
+                service.configure(baseURL: creds.baseURL, apiKey: creds.apiKey)
+            }
         }
     }
 
     private func toggle() async {
         if recording {
-            service.stop()
+            transcribing = true
             recording = false
+            if let result = await service.stop() {
+                text = result
+            }
+            transcribing = false
         } else {
             let ok = await service.requestAccess()
             guard ok else { return }
-            try? service.start { partial in
-                text = partial
-            }
+            try? service.start { _ in }
             recording = true
         }
     }
 
     private func save() {
-        if recording { service.stop() }
         let entry = DailyLogEntry(kind: .voice, transcript: text, contentText: text, tags: [], confirmation: .confirmed)
         env.context.insert(entry)
         try? env.context.save()

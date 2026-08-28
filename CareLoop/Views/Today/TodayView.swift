@@ -42,7 +42,13 @@ struct TodayView: View {
             }
             .background(CareTheme.paper.ignoresSafeArea())
             .navigationTitle("今日")
-            .task { await loadMetrics() }
+            .task {
+                await loadMetrics()
+                NotificationService.syncMedicationReminders(from: medications)
+                let profile = env.profile()
+                let isDiabetic = profile.parsedConditions.contains(.diabetes)
+                NotificationService.scheduleDietReminders(forDiabetic: isDiabetic)
+            }
             .sheet(isPresented: $showDietChat) {
                 DietChatView()
             }
@@ -198,6 +204,9 @@ struct TodayView: View {
                     .foregroundStyle(CareTheme.muted)
             }
             ForEach(slots) { slot in
+                let medSlots = slots.filter { $0.medicationID == slot.medicationID }
+                let medTaken = medSlots.filter { $0.status == .taken }.count
+                let medTotal = medSlots.count
                 HStack(spacing: 10) {
                     Circle()
                         .fill(slotColor(slot.status))
@@ -211,10 +220,20 @@ struct TodayView: View {
                             .foregroundStyle(CareTheme.muted)
                     }
                     Spacer()
-                    Button(slot.status == .taken ? "已服" : "打卡") {
+                    Button {
                         mark(slot)
+                    } label: {
+                        if slot.status == .taken {
+                            Text("已服 ✓")
+                                .font(.caption.weight(.semibold))
+                        } else if medTotal > 1 {
+                            Text("打卡 (\(medTaken)/\(medTotal)次)")
+                                .font(.caption.weight(.semibold))
+                        } else {
+                            Text("打卡")
+                                .font(.caption.weight(.semibold))
+                        }
                     }
-                    .font(.caption.weight(.semibold))
                     .padding(.horizontal, 14)
                     .padding(.vertical, 6)
                     .background(Capsule().fill(slot.status == .taken ? CareTheme.sageSoft : CareTheme.sage))

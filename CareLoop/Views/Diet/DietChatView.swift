@@ -26,7 +26,7 @@ struct DietChatView: View {
                 suggestionArea
                 inputBar
             }
-            .background(Color(red: 0.98, green: 0.98, blue: 0.97).ignoresSafeArea())
+            .background(CareTheme.paper.ignoresSafeArea())
             .navigationTitle(BaobaoPersona.name)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
@@ -132,7 +132,7 @@ struct DietChatView: View {
                 .padding(12)
                 .background(
                     RoundedRectangle(cornerRadius: 12, style: .continuous)
-                        .fill(Color(red: 0.94, green: 0.94, blue: 0.94))
+                        .fill(CareTheme.sageSoft)
                 )
                 .frame(maxWidth: .infinity, alignment: .trailing)
         case .baobao:
@@ -175,20 +175,41 @@ struct DietChatView: View {
                                 .shadow(color: CareTheme.ink.opacity(0.05), radius: 4, y: 1)
                         )
                     if let recipes = message.suggestedRecipes, !recipes.isEmpty, selection == nil {
-                        HStack(spacing: 8) {
-                            ForEach(recipes.prefix(2)) { recipe in
-                                Button {
-                                    confirm(recipe)
-                                } label: {
-                                    Text("就这个吧 ✓")
-                                        .font(.caption.weight(.semibold))
-                                        .foregroundStyle(.white)
-                                        .padding(.horizontal, 12)
-                                        .padding(.vertical, 7)
-                                        .background(Capsule().fill(CareTheme.sage))
+                        VStack(alignment: .leading, spacing: 6) {
+                            HStack(spacing: 8) {
+                                ForEach(recipes.prefix(2)) { recipe in
+                                    Button {
+                                        confirm(recipe)
+                                    } label: {
+                                        Text(recipe.name)
+                                            .font(.caption.weight(.semibold))
+                                            .foregroundStyle(CareTheme.sage)
+                                            .padding(.horizontal, 12)
+                                            .padding(.vertical, 7)
+                                            .background(
+                                                Capsule()
+                                                    .fill(.white)
+                                                    .overlay(Capsule().stroke(CareTheme.sage.opacity(0.5), lineWidth: 1))
+                                            )
+                                    }
+                                    .buttonStyle(.plain)
                                 }
-                                .buttonStyle(.plain)
                             }
+                            Button {
+                                input = "都不想吃"
+                                Task { await send() }
+                            } label: {
+                                Text("都不想吃…")
+                                    .font(.caption.weight(.medium))
+                                    .foregroundStyle(CareTheme.muted)
+                                    .padding(.horizontal, 12)
+                                    .padding(.vertical, 5)
+                                    .background(
+                                        Capsule()
+                                            .fill(Color(white: 0.96))
+                                    )
+                            }
+                            .buttonStyle(.plain)
                         }
                     }
                 }
@@ -305,6 +326,20 @@ struct DietChatView: View {
                     suggestedRecipes: [target]
                 )
             }
+        }
+
+        // 全部拒绝场景：用户说"都不想吃"
+        if text.contains("都不想吃") {
+            let lastSuggested = messages.last(where: { $0.suggestedRecipes?.isEmpty == false })?.suggestedRecipes ?? []
+            let alternatives = safeRecipes.filter { recipe in
+                !lastSuggested.contains(where: { $0.id == recipe.id })
+            }
+            let picks = Array((alternatives.isEmpty ? safeRecipes : alternatives).prefix(2))
+            return BaobaoMessage(
+                role: .baobao,
+                text: BaobaoPersona.alternativesReply(for: picks.map(\.name)),
+                suggestedRecipes: picks
+            )
         }
 
         // 拒绝场景：用户说"不想吃 XX"

@@ -97,6 +97,15 @@ final class AppEnvironment {
         ProviderManager(context: context).makeLLM(selection: activeSelection)
     }
 
+    func currentProviderCredentials() -> (baseURL: URL?, apiKey: String) {
+        let manager = ProviderManager(context: context)
+        guard let provider = manager.providers().first(where: { $0.key == activeSelection.providerKey && $0.enabled }),
+              let url = URL(string: provider.baseURL) else {
+            return (nil, "")
+        }
+        return (url, manager.key(for: provider))
+    }
+
     func profile() -> UserProfile {
         let items = (try? context.fetch(FetchDescriptor<UserProfile>())) ?? []
         if let existing = items.first { return existing }

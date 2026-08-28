@@ -60,4 +60,65 @@ enum NotificationService {
         let request = UNNotificationRequest(identifier: "careloop.journal.daily", content: content, trigger: trigger)
         center.add(request)
     }
+
+    static func syncMedicationReminders(from medications: [Medication]) {
+        let center = UNUserNotificationCenter.current()
+        center.removePendingNotificationRequests(
+            withIdentifiers: pendingIDs(prefix: "careloop.medication.")
+        )
+        for med in medications where med.isActive && med.confirmedByUser {
+            for (index, timeText) in med.timesOfDay.enumerated() {
+                let parts = timeText.split(separator: ":")
+                guard parts.count >= 2, let hour = Int(parts[0]), let minute = Int(parts[1]) else { continue }
+                let identifier = "careloop.medication.\(med.id.uuidString).\(index)"
+                let content = UNMutableNotificationContent()
+                content.title = "该吃药啦"
+                var body = med.name
+                if !med.dosePerTime.isEmpty { body += " · \(med.dosePerTime)" }
+                content.body = body
+                content.sound = .default
+                var date = DateComponents()
+                date.hour = hour
+                date.minute = minute
+                let trigger = UNCalendarNotificationTrigger(dateMatching: date, repeats: true)
+                center.add(UNNotificationRequest(identifier: identifier, content: content, trigger: trigger))
+            }
+        }
+    }
+
+    static func scheduleDietReminders(forDiabetic isDiabetic: Bool) {
+        let center = UNUserNotificationCenter.current()
+        center.removePendingNotificationRequests(
+            withIdentifiers: pendingIDs(prefix: "careloop.diet.")
+        )
+        guard isDiabetic else { return }
+        let meals: [(String, Int, Int)] = [
+            ("breakfast", 7, 30),
+            ("lunch", 11, 30),
+            ("dinner", 17, 30),
+        ]
+        for (meal, hour, minute) in meals {
+            let identifier = "careloop.diet.\(meal)"
+            let content = UNMutableNotificationContent()
+            content.title = "该想想吃什么啦"
+            content.body = "问问饱饱，搭配适合你的饮食～ (=^･^=)"
+            content.sound = .default
+            var date = DateComponents()
+            date.hour = hour
+            date.minute = minute
+            let trigger = UNCalendarNotificationTrigger(dateMatching: date, repeats: true)
+            center.add(UNNotificationRequest(identifier: identifier, content: content, trigger: trigger))
+        }
+    }
+
+    private static func pendingIDs(prefix: String) -> [String] {
+        var result: [String] = []
+        let semaphore = DispatchSemaphore(value: 0)
+        UNUserNotificationCenter.current().getPendingNotificationRequests { requests in
+            result = requests.map(\.identifier).filter { $0.hasPrefix(prefix) }
+            semaphore.signal()
+        }
+        semaphore.wait()
+        return result
+    }
 }
