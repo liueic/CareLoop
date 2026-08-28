@@ -1,0 +1,40 @@
+risk_levels:
+  normal:
+    name_cn: 正常
+    name_en: Normal
+    color: "#4CAF50"
+    description_cn: 指标在正常范围内
+    description_en: Values within normal range
+    action: routine_monitoring
+
+  low_elevated:
+    name_cn: 偏高
+    name_en: Low Elevated
+    color: "#FFC107"
+    description_cn: 指标略高于正常范围，需关注
+    description_en: Slightly above normal range, monitor closely
+    action: lifestyle_modification
+
+  medium:
+    name_cn: 中等风险
+    name_en: Medium Risk
+    color: "#FF9800"
+    description_cn: 指标异常，建议就医咨询
+    description_en: Abnormal values, consult healthcare provider
+    action: medical_consultation
+
+  high:
+    name_cn: 高风险
+    name_en: High Risk
+    color: "#F44336"
+    description_cn: 指标明显异常，需尽快就医
+    description_en: Significantly abnormal, seek medical attention promptly
+    action: urgent_medical_attention
+
+  urgent:
+    name_cn: 紧急
+    name_en: Urgent
+    color: "#D32F2F"
+    description_cn: 指标危急，请立即就医
+    description_en: Critical values, seek immediate medical care
+    action: emergency_care

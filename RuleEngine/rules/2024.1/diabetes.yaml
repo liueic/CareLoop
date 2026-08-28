@@ -1,0 +1,152 @@
+ruleset:
+  id: diabetes
+  version: "2024.1.0"
+  disease_category: diabetes
+  standard_profile: CN-2023
+  status: active
+  effective_date: "2024-06-01"
+  sources:
+    - source_id: CDS-2020
+      org_cn: 中华医学会糖尿病学分会
+      org_en: Chinese Diabetes Society
+      title: 中国2型糖尿病防治指南（2020年版）
+      year: 2020
+      publisher: 中华医学杂志
+
+  rules:
+    # 空腹血糖评估
+    - id: DIA-SP-001
+      name:
+        cn: 空腹血糖分级
+        en: Fasting Blood Glucose Grading
+      type: single_point
+      priority: 100
+      enabled: true
+      inputs:
+        required: [blood_glucose]
+        context: [fasting]
+        unit_requirements: {blood_glucose: mmol/L}
+      conditions:
+        any:
+          - all: {blood_glucose: {gte: 11.1}}
+            output_risk: urgent
+            tag: severe_hyperglycemia
+          - all: {blood_glucose: {gte: 7.0, lt: 11.1}}
+            output_risk: high
+            tag: diabetes_range
+          - all: {blood_glucose: {gte: 6.1, lt: 7.0}}
+            output_risk: medium
+            tag: prediabetes_ifg
+          - all: {blood_glucose: {gte: 3.9, lt: 6.1}}
+            output_risk: normal
+            tag: normal_fasting
+          - all: {blood_glucose: {lt: 3.9, gte: 3.0}}
+            output_risk: medium
+            tag: hypoglycemia_warning
+          - all: {blood_glucose: {lt: 3.0}}
+            output_risk: urgent
+            tag: severe_hypoglycemia
+        default_risk: normal
+      evidence:
+        - source_id: CDS-2020
+          section: "第2章 糖尿病诊断与分型"
+          quote: "空腹血糖≥7.0 mmol/L可诊断为糖尿病；空腹血糖6.1-6.9 mmol/L为空腹血糖受损（IFG）"
+      confidence: high
+      advice_ids: [AD-DIA-101, AD-DIA-102]
+
+    # 餐后血糖评估
+    - id: DIA-SP-002
+      name:
+        cn: 餐后2小时血糖分级
+        en: 2-Hour Postprandial Blood Glucose Grading
+      type: single_point
+      priority: 95
+      enabled: true
+      inputs:
+        required: [blood_glucose]
+        context: [postprandial]
+        unit_requirements: {blood_glucose: mmol/L}
+      conditions:
+        any:
+          - all: {blood_glucose: {gte: 11.1}}
+            output_risk: high
+            tag: diabetes_range_postprandial
+          - all: {blood_glucose: {gte: 7.8, lt: 11.1}}
+            output_risk: medium
+            tag: prediabetes_igt
+          - all: {blood_glucose: {lt: 7.8}}
+            output_risk: normal
+            tag: normal_postprandial
+        default_risk: normal
+      evidence:
+        - source_id: CDS-2020
+          section: "第2章 糖尿病诊断与分型"
+          quote: "OGTT 2h血糖≥11.1 mmol/L可诊断为糖尿病；7.8-11.0 mmol/L为糖耐量异常（IGT）"
+      confidence: high
+      advice_ids: [AD-DIA-101, AD-DIA-102]
+
+    # 糖化血红蛋白评估
+    - id: DIA-SP-003
+      name:
+        cn: 糖化血红蛋白分级
+        en: HbA1c Grading
+      type: single_point
+      priority: 90
+      enabled: true
+      inputs:
+        required: [hba1c]
+        unit_requirements: {hba1c: percent}
+      conditions:
+        any:
+          - all: {hba1c: {gte: 6.5}}
+            output_risk: high
+            tag: diabetes_hba1c
+          - all: {hba1c: {gte: 5.7, lt: 6.5}}
+            output_risk: medium
+            tag: prediabetes_hba1c
+          - all: {hba1c: {lt: 5.7}}
+            output_risk: normal
+            tag: normal_hba1c
+        default_risk: normal
+      evidence:
+        - source_id: CDS-2020
+          section: "第2章 糖尿病诊断与分型"
+          quote: "HbA1c≥6.5%可作为糖尿病诊断标准之一"
+      confidence: high
+      advice_ids: [AD-DIA-101, AD-DIA-102]
+
+    # CGM 目标范围内时间（TIR）趋势评估
+    - id: DIA-TR-001
+      name:
+        cn: CGM目标范围内时间评估
+        en: CGM Time In Range Assessment
+      type: trend
+      priority: 85
+      enabled: true
+      inputs:
+        required: [blood_glucose]
+        window:
+          days: 14
+          min_samples: 10
+          min_samples_per_day: 1
+      conditions:
+        any:
+          - aggregate: {tir: {lt: 50}}
+            output_risk: high
+            tag: poor_glycemic_control
+          - aggregate: {tir: {gte: 50, lt: 70}}
+            output_risk: medium
+            tag: suboptimal_control
+          - aggregate: {tbr: {gte: 10}}
+            output_risk: high
+            tag: frequent_hypoglycemia
+          - aggregate: {tar: {gte: 30}}
+            output_risk: medium
+            tag: frequent_hyperglycemia
+        default_risk: normal
+      evidence:
+        - source_id: CDS-2020
+          section: "第6章 血糖监测"
+          quote: "CGM目标范围内时间（TIR）>70%为血糖控制良好，低于目标时间（TBR）<4%，高于目标时间（TAR）<25%"
+      confidence: high
+      advice_ids: [AD-DIA-101, AD-DIA-102]
