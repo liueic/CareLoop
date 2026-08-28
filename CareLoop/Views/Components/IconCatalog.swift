@@ -9,6 +9,7 @@ enum IconCatalog {
         case .text: "text.alignleft"
         case .quickTag: "tag.fill"
         case .symptom: "waveform.path.ecg"
+        case .medicalDoc: "doc.text.magnifyingglass"
         }
     }
 

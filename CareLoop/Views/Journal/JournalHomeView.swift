@@ -298,7 +298,10 @@ struct JournalCard: View {
                     .foregroundStyle(CareTheme.muted)
             }
             .foregroundStyle(CareTheme.sage)
-            if let ref = entry.photoRef, let image = PhotoStore.load(ref) {
+
+            if let doc = entry.medicalDoc {
+                medicalDocSection(doc)
+            } else if let ref = entry.photoRef, let image = PhotoStore.load(ref) {
                 Image(uiImage: image)
                     .resizable()
                     .scaledToFill()
@@ -306,6 +309,7 @@ struct JournalCard: View {
                     .clipped()
                     .clipShape(RoundedRectangle(cornerRadius: CareTheme.smallCornerRadius, style: .continuous))
             }
+
             Text(entry.displayBody)
                 .font(CareTheme.body)
                 .foregroundStyle(CareTheme.ink)
@@ -320,6 +324,78 @@ struct JournalCard: View {
         .careCard()
     }
 
+    @ViewBuilder
+    private func medicalDocSection(_ doc: MedicalDocResult) -> some View {
+        VStack(alignment: .leading, spacing: 6) {
+            HStack(spacing: 6) {
+                Text(doc.docType)
+                    .font(.caption.bold())
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 3)
+                    .background(CareTheme.sage.opacity(0.15))
+                    .clipShape(Capsule())
+                if let title = doc.title, !title.isEmpty {
+                    Text(title).font(.caption).foregroundStyle(CareTheme.muted)
+                }
+            }
+            if !doc.diagnoses.isEmpty {
+                Text(doc.diagnoses.joined(separator: "、"))
+                    .font(.subheadline)
+                    .foregroundStyle(CareTheme.ink)
+            }
+            if !doc.labValues.isEmpty {
+                VStack(alignment: .leading, spacing: 2) {
+                    ForEach(doc.labValues.prefix(3), id: \.name) { lab in
+                        HStack(spacing: 4) {
+                            Text(lab.name).font(.caption)
+                            Text("\(lab.value)\(lab.unit.map { " \($0)" } ?? "")")
+                                .font(.caption.monospacedDigit())
+                            if let flag = lab.flag {
+                                Image(systemName: flag == "high" ? "arrow.up.circle.fill" : flag == "low" ? "arrow.down.circle.fill" : "checkmark.circle")
+                                    .font(.caption2)
+                                    .foregroundStyle(flag == "high" ? CareTheme.danger : flag == "low" ? Color.orange : CareTheme.sage)
+                            }
+                        }
+                    }
+                    if doc.labValues.count > 3 {
+                        Text("+\(doc.labValues.count - 3) 项")
+                            .font(.caption2)
+                            .foregroundStyle(CareTheme.muted)
+                    }
+                }
+            }
+            if !doc.medications.isEmpty {
+                VStack(alignment: .leading, spacing: 2) {
+                    ForEach(doc.medications, id: \.name) { med in
+                        HStack(spacing: 4) {
+                            Text(med.name).font(.caption)
+                            if let dose = med.dose, !dose.isEmpty {
+                                Text(dose).font(.caption).foregroundStyle(CareTheme.muted)
+                            }
+                            if let freq = med.frequency, !freq.isEmpty {
+                                Text("· \(freq)").font(.caption2).foregroundStyle(CareTheme.muted)
+                            }
+                        }
+                    }
+                }
+            }
+            if let followUpDate = doc.followUpDate, !followUpDate.isEmpty {
+                HStack(spacing: 4) {
+                    Image(systemName: "calendar").font(.caption2)
+                    Text(followUpDate).font(.caption)
+                    if let dept = doc.followUpDepartment, !dept.isEmpty {
+                        Text(dept).font(.caption).foregroundStyle(CareTheme.muted)
+                    }
+                }
+                .foregroundStyle(CareTheme.sage)
+            } else if let hint = doc.followUpHint, !hint.isEmpty {
+                Label(hint, systemImage: "calendar")
+                    .font(.caption)
+                    .foregroundStyle(CareTheme.sage)
+            }
+        }
+    }
+
     private var label: String {
         switch entry.kind {
         case .photo: "水印照片"
@@ -327,6 +403,7 @@ struct JournalCard: View {
         case .text: "文字"
         case .quickTag: "标签"
         case .symptom: "症状"
+        case .medicalDoc: "病历识别"
         }
     }
 }

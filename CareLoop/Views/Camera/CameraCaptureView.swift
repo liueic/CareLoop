@@ -1,11 +1,21 @@
 import AVFoundation
 import PhotosUI
+import SwiftData
 import SwiftUI
 import UIKit
 
 struct CameraCaptureView: View {
+    enum CaptureMode: String, CaseIterable, Identifiable {
+        case journal = "日记"
+        case medicalDoc = "病历/报告"
+        var id: String { rawValue }
+    }
+
+    private let docHintOptions = ["检验报告", "病历", "出院小结", "处方单", "诊断证明"]
+
     @Environment(\.dismiss) private var dismiss
     @Environment(AppEnvironment.self) private var env
+    @State private var mode: CaptureMode = .journal
     @State private var captured: UIImage?
     @State private var watermarked: UIImage?
     @State private var snapshot: WatermarkSnapshot?
@@ -18,11 +28,27 @@ struct CameraCaptureView: View {
     @State private var errorText: String?
     @State private var cameraUnavailable = false
     @State private var pickerItem: PhotosPickerItem?
+    @State private var docHint = "检验报告"
+    @State private var medicalDocResult: MedicalDocResult?
 
     var body: some View {
         NavigationStack {
             VStack {
-                if let watermarked {
+                if watermarked == nil && captured == nil {
+                    Picker("模式", selection: $mode) {
+                        ForEach(CaptureMode.allCases) { m in
+                            Text(m.rawValue).tag(m)
+                        }
+                    }
+                    .pickerStyle(.segmented)
+                    .padding(.horizontal)
+                    .padding(.top, 4)
+                }
+                if let medicalDocResult, mode == .medicalDoc {
+                    medicalDocReview(medicalDocResult)
+                } else if mode == .medicalDoc, let captured {
+                    medicalDocCaptureReview(captured)
+                } else if let watermarked {
                     review(watermarked)
                 } else if cameraUnavailable {
                     fallbackCapture
@@ -38,7 +64,7 @@ struct CameraCaptureView: View {
                     .ignoresSafeArea()
                 }
             }
-            .navigationTitle(watermarked == nil ? "水印相机" : "补充（可跳过）")
+            .navigationTitle(navTitle)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
@@ -49,6 +75,13 @@ struct CameraCaptureView: View {
                 Task { await importPicked(item) }
             }
         }
+    }
+
+    private var navTitle: String {
+        if watermarked != nil || captured != nil {
+            return mode == .medicalDoc ? "病历识别" : "补充（可跳过）"
+        }
+        return mode == .medicalDoc ? "病历/报告识别" : "水印相机"
     }
 
     private var fallbackCapture: some View {
@@ -113,9 +146,7 @@ struct CameraCaptureView: View {
                 HStack {
                     Button("直接保存") { save(confirmAI: false) }
                     .accessibilityIdentifier("camera.saveDirect")
-                    if tags.contains(.diet) {
-                        Button("识别食物") { Task { await recognizeFood() } }
-                    }
+                    Button("识别食物") { Task { await recognizeFood() } }
                     if aiLabel != nil {
                         Button("确认识别") { save(confirmAI: true) }
                             .buttonStyle(.borderedProminent)
@@ -129,6 +160,10 @@ struct CameraCaptureView: View {
     }
 
     private func handleCapture(_ image: UIImage) async {
+        captured = image
+        if mode == .medicalDoc {
+            return
+        }
         let profile = env.profile()
         let snap = await env.healthProvider.watermarkSnapshot(at: Date())
         snapshot = snap
@@ -137,13 +172,13 @@ struct CameraCaptureView: View {
             snapshot: snap,
             includeSensitive: profile.showBPOnWatermark || profile.showGlucoseOnWatermark
         )
-        captured = image
         watermarked = composed
     }
 
     private func recognizeFood() async {
         guard let captured else { return }
         recognizing = true
+        errorText = nil
         defer { recognizing = false }
         let llm = env.currentLLM()
         if !llm.supportsVision {
@@ -159,14 +194,14 @@ struct CameraCaptureView: View {
                 images: [jpeg]
             )
             let result = try await llm.complete(prompt: prompt)
-            if let data = result.text.data(using: .utf8),
-               let obj = try? JSONSerialization.jsonObject(with: data) as? [String: Any] {
+            if let obj = LLMJSON.object(from: result.text) {
                 aiLabel = obj["label"] as? String
                 aiExplanation = obj["explanation"] as? String
             } else {
                 aiLabel = "待确认的食物记录"
                 aiExplanation = result.text
             }
+            tags.insert(.diet)
             pendingAI = true
         } catch {
             errorText = "识别暂不可用，可手动打标签。\(error.localizedDescription)"
@@ -199,6 +234,293 @@ struct CameraCaptureView: View {
         } catch {
             errorText = "保存失败"
         }
+    }
+
+    @ViewBuilder
+    private func medicalDocCaptureReview(_ image: UIImage) -> some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 12) {
+                Image(uiImage: image)
+                    .resizable()
+                    .scaledToFit()
+                    .clipShape(RoundedRectangle(cornerRadius: 16))
+
+                Picker("文档类型", selection: $docHint) {
+                    ForEach(docHintOptions, id: \.self) { Text($0) }
+                }
+                .pickerStyle(.menu)
+
+                if recognizing {
+                    ProgressView("正在识别文档内容…")
+                }
+                if let errorText {
+                    Text(errorText).foregroundStyle(CareTheme.danger).font(.caption)
+                }
+
+                HStack {
+                    Button("重新拍照") {
+                        captured = nil
+                        medicalDocResult = nil
+                    }
+                    Button("识别这份文档") { Task { await recognizeMedicalDocument() } }
+                        .buttonStyle(.borderedProminent)
+                        .disabled(recognizing)
+                }
+
+                Text(CareLoopCopy.notADiagnosis)
+                    .font(.caption)
+                    .foregroundStyle(CareTheme.muted)
+            }
+            .padding()
+        }
+        .background(CareTheme.paper.ignoresSafeArea())
+    }
+
+    private func recognizeMedicalDocument() async {
+        guard let captured else { return }
+        recognizing = true
+        errorText = nil
+        defer { recognizing = false }
+        do {
+            let llm = env.currentLLM()
+            let result = try await MedicalDocumentAnalyzer.analyze(
+                image: captured,
+                docHint: docHint,
+                llm: llm
+            )
+            medicalDocResult = result
+        } catch {
+            errorText = "识别失败：\(error.localizedDescription)"
+        }
+    }
+
+    @ViewBuilder
+    private func medicalDocReview(_ result: MedicalDocResult) -> some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 14) {
+                HStack {
+                    Text(result.docType)
+                        .font(.caption.bold())
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 4)
+                        .background(CareTheme.sage.opacity(0.15))
+                        .clipShape(Capsule())
+                    if let takenAt = result.takenAt {
+                        Text(takenAt).font(.caption).foregroundStyle(CareTheme.muted)
+                    }
+                }
+
+                if let title = result.title, !title.isEmpty {
+                    Text(title).font(.headline)
+                }
+
+                if !result.diagnoses.isEmpty {
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text("诊断").font(.caption.bold()).foregroundStyle(CareTheme.muted)
+                        ForEach(result.diagnoses, id: \.self) { dx in
+                            Text("• \(dx)")
+                        }
+                    }
+                }
+
+                if !result.labValues.isEmpty {
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text("检验值").font(.caption.bold()).foregroundStyle(CareTheme.muted)
+                        ForEach(result.labValues, id: \.name) { lab in
+                            HStack {
+                                Text(lab.name)
+                                Spacer()
+                                Text("\(lab.value)\(lab.unit.map { " \($0)" } ?? "")")
+                                    .monospacedDigit()
+                                if let flag = lab.flag {
+                                    Image(systemName: flag == "high" ? "arrow.up.circle.fill" : flag == "low" ? "arrow.down.circle.fill" : "checkmark.circle")
+                                        .foregroundStyle(flag == "high" ? CareTheme.danger : flag == "low" ? Color.orange : CareTheme.sage)
+                                }
+                            }
+                            .font(.subheadline)
+                        }
+                    }
+                }
+
+                if !result.medications.isEmpty {
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text("用药").font(.caption.bold()).foregroundStyle(CareTheme.muted)
+                        ForEach(result.medications, id: \.name) { med in
+                            VStack(alignment: .leading, spacing: 2) {
+                                HStack {
+                                    Text(med.name)
+                                    if let dose = med.dose { Text(dose).foregroundStyle(CareTheme.muted) }
+                                }
+                                .font(.subheadline)
+                                HStack(spacing: 6) {
+                                    if let freq = med.frequency {
+                                        Text(freq)
+                                            .font(.caption)
+                                            .foregroundStyle(CareTheme.sage)
+                                    }
+                                    if let times = med.timesOfDay, !times.isEmpty {
+                                        Text(times.joined(separator: ", "))
+                                            .font(.caption.monospacedDigit())
+                                            .foregroundStyle(CareTheme.muted)
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                if !result.recommendations.isEmpty {
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text("建议").font(.caption.bold()).foregroundStyle(CareTheme.muted)
+                        ForEach(result.recommendations, id: \.self) { rec in
+                            Text("• \(rec)")
+                        }
+                    }
+                }
+
+                if let followUp = result.followUpHint {
+                    VStack(alignment: .leading, spacing: 2) {
+                        Label(followUp, systemImage: "calendar")
+                            .font(.subheadline)
+                            .foregroundStyle(CareTheme.sage)
+                        if let dateStr = result.followUpDate {
+                            HStack(spacing: 4) {
+                                Text("复诊日期：\(dateStr)")
+                                if let dept = result.followUpDepartment {
+                                    Text("·")
+                                    Text(dept)
+                                }
+                            }
+                            .font(.caption)
+                            .foregroundStyle(CareTheme.muted)
+                        }
+                    }
+                } else if let dateStr = result.followUpDate {
+                    HStack(spacing: 4) {
+                        Label("复诊：\(dateStr)", systemImage: "calendar")
+                            .font(.subheadline)
+                        if let dept = result.followUpDepartment {
+                            Text("· \(dept)")
+                        }
+                    }
+                    .foregroundStyle(CareTheme.sage)
+                }
+
+                Text(result.summary)
+                    .font(.subheadline)
+                    .padding(.top, 4)
+
+                Text("识别结果需由你确认后才写入档案")
+                    .font(.caption)
+                    .foregroundStyle(CareTheme.warn)
+
+                HStack {
+                    Button("重新识别") {
+                        medicalDocResult = nil
+                        captured = nil
+                    }
+                    Button("确认并保存") { saveMedicalDoc(result) }
+                        .buttonStyle(.borderedProminent)
+                }
+
+                Text(CareLoopCopy.medicalDisclaimer)
+                    .font(.caption)
+                    .foregroundStyle(CareTheme.muted)
+            }
+            .padding()
+        }
+        .background(CareTheme.paper.ignoresSafeArea())
+    }
+
+    private func saveMedicalDoc(_ result: MedicalDocResult) {
+        do {
+            var photoRef: String?
+            if let captured, let jpeg = captured.jpegData(compressionQuality: 0.8) {
+                let fileName = "medicaldoc-\(UUID().uuidString).jpg"
+                let url = URL(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent(fileName)
+                try jpeg.write(to: url)
+                photoRef = url.path
+            }
+
+            var structured = DailyStructuredFields()
+            structured.medicalDoc = result
+            let entry = DailyLogEntry(
+                kind: .medicalDoc,
+                photoRef: photoRef,
+                watermark: nil,
+                contentText: result.summary,
+                tags: [LogTag.symptom.rawValue],
+                structured: structured,
+                confirmation: .confirmed
+            )
+            entry.aiLabel = result.title ?? result.docType
+            entry.aiExplanation = result.summary
+            env.context.insert(entry)
+
+            let prescribedDate = parseDate(result.takenAt)
+
+            for ext in result.medications {
+                let existing = (try? env.context.fetch(FetchDescriptor<Medication>())) ?? []
+                if existing.contains(where: { $0.name == ext.name }) { continue }
+                let freq = ext.frequencyPerDay ?? parseFrequency(ext.frequency) ?? 1
+                let times = ext.timesOfDay ?? defaultTimes(for: freq)
+                let med = Medication(
+                    name: ext.name,
+                    dosePerTime: ext.dose ?? "",
+                    frequencyPerDay: freq,
+                    timesOfDay: times,
+                    cautions: ext.cautions ?? "",
+                    source: .medicalDocOCR,
+                    prescribedDate: prescribedDate
+                )
+                env.context.insert(med)
+            }
+
+            if let dateStr = result.followUpDate, let followDate = parseDate(dateStr) {
+                let followUp = FollowUp(
+                    mode: .doctorOrdered,
+                    date: followDate,
+                    department: result.followUpDepartment ?? "",
+                    notes: result.followUpHint ?? "",
+                    confirmedByUser: true
+                )
+                env.context.insert(followUp)
+            }
+
+            try env.context.save()
+            Task { await env.refreshTodayPipeline() }
+            dismiss()
+        } catch {
+            errorText = "保存失败"
+        }
+    }
+
+    private func parseFrequency(_ text: String?) -> Int? {
+        guard let text else { return nil }
+        let lower = text.lowercased()
+        if lower.contains("tid") || lower.contains("每日3次") || lower.contains("一天3次") { return 3 }
+        if lower.contains("bid") || lower.contains("每日2次") || lower.contains("一天2次") { return 2 }
+        if lower.contains("qd") || lower.contains("每日1次") || lower.contains("一天1次") { return 1 }
+        if let match = text.first(where: { $0.isNumber }) {
+            return Int(String(match))
+        }
+        return nil
+    }
+
+    private func defaultTimes(for frequency: Int) -> [String] {
+        switch frequency {
+        case 1: ["08:00"]
+        case 2: ["08:00", "20:00"]
+        case 3: ["08:00", "14:00", "20:00"]
+        default: [String](repeating: "08:00", count: max(1, frequency))
+        }
+    }
+
+    private func parseDate(_ text: String?) -> Date? {
+        guard let text else { return nil }
+        let fmt = ISO8601DateFormatter()
+        fmt.formatOptions = [.withFullDate]
+        return fmt.date(from: text)
     }
 
     private func importPicked(_ item: PhotosPickerItem?) async {

@@ -149,6 +149,7 @@ enum LogKind: String, Codable, CaseIterable, Sendable {
     case text
     case quickTag
     case symptom
+    case medicalDoc
 }
 
 enum ConfirmationState: String, Codable, CaseIterable, Sendable {
@@ -179,6 +180,7 @@ enum SymptomSeverity: String, Codable, CaseIterable, Sendable {
 enum MedicationSource: String, Codable, Sendable {
     case manual = "手动"
     case prescriptionOCR = "处方识别"
+    case medicalDocOCR = "病历识别"
 }
 
 enum IntakeStatus: String, Codable, CaseIterable, Sendable {
@@ -274,4 +276,36 @@ struct DailyStructuredFields: Codable, Hashable, Sendable {
     var exerciseIntensity: IntensityLevel?
     var recognizedFoodLabel: String?
     var recognizedExplanation: String?
+    var medicalDoc: MedicalDocResult?
+}
+
+struct MedicalDocResult: Codable, Hashable, Sendable {
+    var docType: String
+    var title: String?
+    var takenAt: String?
+    var diagnoses: [String]
+    var labValues: [LabValueItem]
+    var medications: [ExtractedMedication]
+    var recommendations: [String]
+    var followUpHint: String?
+    var followUpDate: String?
+    var followUpDepartment: String?
+    var summary: String
+}
+
+struct LabValueItem: Codable, Hashable, Sendable {
+    var name: String
+    var value: String
+    var unit: String?
+    var reference: String?
+    var flag: String?
+}
+
+struct ExtractedMedication: Codable, Hashable, Sendable {
+    var name: String
+    var dose: String?
+    var frequency: String?
+    var timesOfDay: [String]?
+    var frequencyPerDay: Int?
+    var cautions: String?
 }

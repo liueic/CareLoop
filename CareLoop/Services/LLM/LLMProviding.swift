@@ -4,6 +4,7 @@ struct LLMPrompt: Sendable {
     var system: String
     var user: String
     var images: [Data]
+    var maxTokens: Int? = nil
 }
 
 struct LLMCompletion: Sendable {
@@ -85,5 +86,23 @@ struct OpenAIModelList: Decodable {
     var data: [Item]
     struct Item: Decodable {
         var id: String
+    }
+}
+
+enum LLMJSON {
+    static func object(from text: String) -> [String: Any]? {
+        var cleaned = text.trimmingCharacters(in: .whitespacesAndNewlines)
+        if let fenceStart = cleaned.range(of: "```json"),
+           let fenceEnd = cleaned.range(of: "```", options: .backwards) {
+            cleaned = String(cleaned[fenceStart.upperBound..<fenceEnd.lowerBound])
+                .trimmingCharacters(in: .whitespacesAndNewlines)
+        } else if let fenceStart = cleaned.range(of: "```"),
+                  let fenceEnd = cleaned.range(of: "```", options: .backwards),
+                  fenceStart.lowerBound != fenceEnd.lowerBound {
+            cleaned = String(cleaned[fenceStart.upperBound..<fenceEnd.lowerBound])
+                .trimmingCharacters(in: .whitespacesAndNewlines)
+        }
+        guard let data = cleaned.data(using: .utf8) else { return nil }
+        return try? JSONSerialization.jsonObject(with: data) as? [String: Any]
     }
 }

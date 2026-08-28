@@ -79,11 +79,19 @@ final class DailyLogEntry {
         set { structuredJSON = try? JSONEncoder().encode(newValue) }
     }
 
+    var medicalDoc: MedicalDocResult? {
+        structuredFields?.medicalDoc
+    }
+
     var displayBody: String {
         if !contentText.isEmpty { return contentText }
         if !transcript.isEmpty { return transcript }
         if !symptoms.isEmpty {
             return symptoms.map { "\($0.name)·\($0.severity.rawValue)" }.joined(separator: "、")
+        }
+        if let doc = medicalDoc {
+            let parts = [doc.title, doc.summary].compactMap { $0 }.filter { !$0.isEmpty }
+            if !parts.isEmpty { return parts.joined(separator: " — ") }
         }
         if let aiLabel { return aiLabel }
         return "一条手帐"

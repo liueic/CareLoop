@@ -31,7 +31,7 @@ struct OpenAICompatibleProvider: LLMProviding {
             }
             messages.append(.init(role: "user", content: .parts(parts)))
         }
-        let payload = OpenAIChatRequest(model: modelID, messages: messages, max_tokens: 600, temperature: 0.4)
+        let payload = OpenAIChatRequest(model: modelID, messages: messages, max_tokens: prompt.maxTokens ?? 600, temperature: 0.4)
         let data = try await post(path: "chat/completions", body: payload)
         let decoded = try JSONDecoder().decode(OpenAIChatResponse.self, from: data)
         guard let text = decoded.choices?.first?.message?.content, !text.isEmpty else {
