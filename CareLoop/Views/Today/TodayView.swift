@@ -269,7 +269,16 @@ struct TodayView: View {
                 Button("饮食问一问") { showDietChat = true }
                     .font(.caption.bold())
             }
-            if let advice = env.lastAdvice {
+            if let picked = BaobaoState.selection() {
+                adviceBlock(
+                    icon: "fork.knife",
+                    title: "今日菜单：\(picked.recipeName)",
+                    body: "烹调少盐少糖，按你的口味来。这不是医疗建议。"
+                )
+                Text("依据：你的选择")
+                    .font(.caption2)
+                    .foregroundStyle(CareTheme.muted.opacity(0.8))
+            } else if let advice = env.lastAdvice {
                 adviceBlock(icon: "fork.knife", title: advice.recipe.title, body: advice.recipe.body)
                 dietClauseFootnotes(for: advice.recipe.clauseCitationIDs)
                 Divider()
