@@ -4,49 +4,52 @@ struct OnboardingFlowView: View {
     @Environment(AppEnvironment.self) private var env
     @State private var step = 0
     @State private var prefill: CharacteristicSnapshot?
-    @State private var requesting = false
 
     var body: some View {
         @Bindable var draft = env.profile()
         NavigationStack {
-            VStack(alignment: .leading, spacing: 16) {
-                ProgressView(value: Double(step + 1), total: 6)
-                    .tint(CareTheme.sage)
-                Group {
-                    switch step {
-                    case 0: welcome
-                    case 1: basics(draft)
-                    case 2: conditions(draft)
-                    case 3: diet(draft)
-                    case 4: movement(draft)
-                    default: permissions
+            Group {
+                if step == 0 {
+                    WelcomeView(skip: { advance(draft, skipping: true) }) {
+                        advance(draft, skipping: false)
                     }
-                }
-                Spacer()
-                HStack {
-                    Button("跳过") { advance(draft, skipping: true) }
-                        .foregroundStyle(CareTheme.muted)
-                        .accessibilityIdentifier("onboarding.skip")
-                    Spacer()
-                    Button(step == 5 ? "进入手帐" : "继续") { advance(draft, skipping: false) }
-                        .buttonStyle(.borderedProminent)
-                        .accessibilityIdentifier("onboarding.continue")
+                } else {
+                    VStack(alignment: .leading, spacing: 16) {
+                        ProgressView(value: Double(step), total: 5)
+                            .tint(CareTheme.sage)
+                        Group {
+                            switch step {
+                            case 1: basics(draft)
+                            case 2: conditions(draft)
+                            case 3: diet(draft)
+                            case 4: movement(draft)
+                            default: ConnectView {
+                                advance(draft, skipping: false)
+                            } skip: {
+                                advance(draft, skipping: true)
+                            }
+                            }
+                        }
+                        if step < 5 {
+                            Spacer()
+                            HStack {
+                                Button("稍后再说") { advance(draft, skipping: true) }
+                                    .foregroundStyle(CareTheme.muted)
+                                    .accessibilityIdentifier("onboarding.skip")
+                                Spacer()
+                                Button("继续") { advance(draft, skipping: false) }
+                                    .buttonStyle(.borderedProminent)
+                                    .tint(CareTheme.sage)
+                                    .accessibilityIdentifier("onboarding.continue")
+                            }
+                        } else {
+                            Spacer(minLength: 0)
+                        }
+                    }
+                    .padding()
                 }
             }
-            .padding()
             .background(CareTheme.paper.ignoresSafeArea())
-            .navigationTitle("开始使用")
-        }
-    }
-
-    private var welcome: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            Text("慢病健康助手")
-                .font(.largeTitle.bold())
-            Text("用最低成本留下今天的记录。拍照、说一句、或打个症状标签都可以。")
-            DisclaimerBanner()
-            Text("我们不做诊断，也不替代医生决策。")
-                .font(.headline)
         }
     }
 
@@ -138,26 +141,6 @@ struct OnboardingFlowView: View {
                 .font(.caption)
         }
         .scrollContentBackground(.hidden)
-    }
-
-    private var permissions: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            Text("系统授权")
-                .font(.title2.bold())
-            Text("HealthKit 用于读取步数、心率、睡眠。拿不到某一项不会卡住，只是少一项提示。")
-            Button(requesting ? "请求中…" : "授权健康数据") {
-                Task {
-                    requesting = true
-                    try? await env.healthProvider.requestAuthorization()
-                    requesting = false
-                }
-            }
-            .buttonStyle(.borderedProminent)
-            Button("授权通知") {
-                Task { _ = await NotificationService.requestAccess() }
-            }
-            DisclaimerBanner()
-        }
     }
 
     private func listBinding(
