@@ -1,0 +1,6 @@
+// 高德 MCP 内置默认 Key。
+// 默认为空（App 内附近搜索退化为不可用，可在设置页填自己的 Key）。
+// 团队成员：复制 AmapKey.local.xcconfig.example 为 AmapKey.local.xcconfig
+// 并填入自己的高德 Web 服务 Key（该文件已被 .gitignore 忽略，不会提交）。
+AMAP_MCP_KEY =
+#include? "AmapKey.local.xcconfig"

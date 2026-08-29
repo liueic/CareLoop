@@ -55,14 +55,66 @@ final class ProviderManager {
         return (try? context.fetch(descriptor)) ?? []
     }
 
+    /// 自定义 Provider 的真 upsert：slug 已存在则更新 baseURL 与 Key，
+    /// 避免同名重复插入导致 apiKeyRef/Keychain 冲突。
     func upsertCustom(name: String, baseURL: String, key: String) {
-        let slug = name.lowercased().replacingOccurrences(of: " ", with: "-")
-        let config = LLMProviderConfig(key: slug, name: name, baseURL: baseURL, isPreset: false)
-        context.insert(config)
-        if !key.isEmpty {
-            KeychainStore.save(key: config.apiKeyRef, secret: key)
+        let trimmedName = name.trimmingCharacters(in: .whitespacesAndNewlines)
+        let trimmedURL = baseURL.trimmingCharacters(in: .whitespacesAndNewlines)
+        let slug = Self.slug(from: trimmedName)
+        if let existing = providers().first(where: { $0.key == slug }) {
+            existing.baseURL = trimmedURL
+            if !key.isEmpty {
+                KeychainStore.save(key: existing.apiKeyRef, secret: key)
+            }
+        } else {
+            let config = LLMProviderConfig(key: slug, name: trimmedName, baseURL: trimmedURL, isPreset: false)
+            context.insert(config)
+            if !key.isEmpty {
+                KeychainStore.save(key: config.apiKeyRef, secret: key)
+            }
         }
         try? context.save()
+    }
+
+    /// 为不提供 GET /models 的端点手动登记模型。
+    @discardableResult
+    func addManualModel(providerKey: String, modelID: String) -> ModelCatalogEntry? {
+        let trimmed = modelID.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else { return nil }
+        if models(providerKey: providerKey).contains(where: { $0.modelID == trimmed }) {
+            return nil
+        }
+        let entry = ModelCatalogEntry(
+            modelID: trimmed,
+            providerKey: providerKey,
+            displayName: trimmed,
+            contextWindow: 0,
+            maxOutputTokens: 0,
+            supportsVision: false,
+            supportsToolCall: true,
+            supportsReasoning: false,
+            inputPrice: 0,
+            outputPrice: 0,
+            knowledgeCutoff: "",
+            source: .manual,
+            metadataUnknown: true
+        )
+        context.insert(entry)
+        try? context.save()
+        return entry
+    }
+
+    /// 删除手动登记或已下线的发现条目；内置与 models.dev 同步的条目不可删。
+    func deleteModel(_ entry: ModelCatalogEntry) {
+        guard entry.source == .manual || entry.source == .discovered else { return }
+        context.delete(entry)
+        try? context.save()
+    }
+
+    private static func slug(from name: String) -> String {
+        name.lowercased()
+            .replacingOccurrences(of: " ", with: "-")
+            .replacingOccurrences(of: "/", with: "-")
     }
 
     func saveKey(_ secret: String, for config: LLMProviderConfig) {
@@ -89,7 +141,7 @@ final class ProviderManager {
             return MockLLMProvider()
         }
         let model = models(providerKey: provider.key).first(where: { $0.modelID == selection.modelID })
-        return OpenAICompatibleProvider(
+        return OpenAIProvider(
             name: provider.name,
             baseURL: url,
             apiKey: secret,

@@ -7,9 +7,10 @@ struct MedicationHomeView: View {
     @Query(sort: \Medication.name) private var medications: [Medication]
     @Query private var intakes: [MedicationIntake]
     @State private var showAdd = false
-    @State private var ocrImage: UIImage?
     @State private var pickerItem: PhotosPickerItem?
-    @State private var draft: DraftMedication?
+    @State private var prescriptionDraft: PrescriptionDraft?
+    @State private var recognizing = false
+    @State private var recognizeError: String?
 
     var body: some View {
         NavigationStack {
@@ -38,24 +39,25 @@ struct MedicationHomeView: View {
                 }
                 Section("处方识别（需确认）") {
                     PhotosPicker(selection: $pickerItem, matching: .images) {
-                        Text("从相册识别处方/病历")
-                    }
-                    if let draft {
-                        Text("识别到：\(draft.name) \(draft.dose)")
-                        Button("确认写入") {
-                            let med = Medication(
-                                name: draft.name,
-                                dosePerTime: draft.dose.isEmpty ? "按医嘱" : draft.dose,
-                                timesOfDay: draft.times,
-                                cautions: draft.cautions,
-                                source: .prescriptionOCR,
-                                prescribedDate: Date(),
-                                confirmedByUser: true
-                            )
-                            env.context.insert(med)
-                            try? env.context.save()
-                            self.draft = nil
+                        HStack {
+                            Image(systemName: "doc.text.viewfinder")
+                            Text("从相册识别处方/病历")
                         }
+                    }
+                    .disabled(recognizing)
+                    Text("支持：医院处方笺、药房小票、药盒标签、电子处方截图。识别后逐项核对才会写入。")
+                        .font(.caption)
+                        .foregroundStyle(CareTheme.muted)
+                    if recognizing {
+                        HStack(spacing: 8) {
+                            ProgressView()
+                            Text("识别中…")
+                        }
+                    }
+                    if let recognizeError {
+                        Text(recognizeError)
+                            .font(.caption)
+                            .foregroundStyle(CareTheme.warn)
                     }
                 }
             }
@@ -63,16 +65,69 @@ struct MedicationHomeView: View {
             .sheet(isPresented: $showAdd) {
                 AddMedicationView()
             }
+            .sheet(item: $prescriptionDraft) { draft in
+                PrescriptionReviewSheet(draft: draft)
+            }
             .onChange(of: pickerItem) { _, item in
                 Task { await recognize(item) }
             }
         }
     }
 
+    /// 强路径：视觉模型（vision 时附图）+ Vision OCR 双输入 → 结构化处方 → 人工核对。
+    /// 失败时回退启发式 OCR 粗识别，表单带"离线粗识别"警示。
     private func recognize(_ item: PhotosPickerItem?) async {
-        guard let item, let data = try? await item.loadTransferable(type: Data.self), let image = UIImage(data: data) else { return }
-        let text = await OCRService.recognize(image: image)
-        draft = OCRService.parsePrescription(from: text)
+        guard let item,
+              let data = try? await item.loadTransferable(type: Data.self),
+              let image = UIImage(data: data) else { return }
+        recognizing = true
+        recognizeError = nil
+        defer {
+            recognizing = false
+            pickerItem = nil
+        }
+        do {
+            let result = try await MedicalDocumentAnalyzer.analyze(
+                image: image,
+                docHint: "处方单",
+                llm: env.currentLLM()
+            )
+            guard !result.medications.isEmpty else {
+                recognizeError = "未识别到药品条目，请换一张更清晰的照片或手动添加。"
+                return
+            }
+            prescriptionDraft = PrescriptionDraft(result: result, image: image)
+        } catch {
+            let text = await OCRService.recognize(image: image)
+            if let rough = OCRService.parsePrescription(from: text) {
+                var ext = ExtractedMedication(
+                    name: rough.name,
+                    dose: nil,
+                    frequency: nil,
+                    timesOfDay: rough.times,
+                    frequencyPerDay: nil,
+                    cautions: nil
+                )
+                ext.dose = rough.dose.isEmpty ? nil : rough.dose
+                ext.cautions = rough.cautions.isEmpty ? nil : rough.cautions
+                let result = MedicalDocResult(
+                    docType: "处方单",
+                    title: "离线粗识别",
+                    takenAt: nil,
+                    diagnoses: [],
+                    labValues: [],
+                    medications: [ext],
+                    recommendations: [],
+                    followUpHint: nil,
+                    followUpDate: nil,
+                    followUpDepartment: nil,
+                    summary: "网络不可用，使用本地 OCR 粗识别，请仔细核对。"
+                )
+                prescriptionDraft = PrescriptionDraft(result: result, image: image, degraded: true)
+            } else {
+                recognizeError = "识别失败（\(error.localizedDescription)），可手动添加。"
+            }
+        }
     }
 }
 

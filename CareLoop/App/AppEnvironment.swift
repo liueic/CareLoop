@@ -11,9 +11,12 @@ final class AppEnvironment {
         didSet {
             UserDefaults.standard.set(demoMode, forKey: "careloop.demoMode")
             refreshProvider()
+            refreshNearbyService()
         }
     }
     var healthProvider: any HealthDataProviding
+    /// 附近餐厅搜索服务（高德 MCP / Mock），附近意图的云端 Agent 使用。
+    private(set) var nearbyFoodService: any NearbyFoodSearching
     var activeSelection: ActiveModelSelection {
         didSet { persistSelection() }
     }
@@ -54,6 +57,8 @@ final class AppEnvironment {
         #endif
         demoMode = UserDefaults.standard.object(forKey: "careloop.demoMode") as? Bool ?? simulatorDemo
         healthProvider = MockHealthProvider()
+        // 先占位，init 末尾 refreshNearbyService() 按 Demo/Key 状态重建。
+        nearbyFoodService = MockNearbyFoodService()
         if let data = UserDefaults.standard.data(forKey: ActiveModelSelection.storageKey),
            let saved = try? JSONDecoder().decode(ActiveModelSelection.self, from: data) {
             activeSelection = saved
@@ -66,7 +71,9 @@ final class AppEnvironment {
         dietRules = DietGuidelineCompiler.mergedWithClinicalAdvice(DietGuidelineRules.load())
         DietSpotlightIndexer.reindex(recipes: recipes, dietRules: dietRules)
         refreshProvider()
+        refreshNearbyService()
         ProviderManager(context: container.mainContext).bootstrapIfNeeded()
+        sanitizeActiveSelectionIfNeeded()
         DemoSeeder.seedIfNeeded(context: container.mainContext)
         let args = ProcessInfo.processInfo.arguments
         if args.contains("-uitest-fresh-onboarding") {
@@ -83,6 +90,9 @@ final class AppEnvironment {
 
     var context: ModelContext { container.mainContext }
 
+    /// 真机定位 Provider：仅在附近搜索工具触发时做一次性定位。
+    private let coreLocationProvider = CoreLocationProvider()
+
     func refreshProvider() {
         if demoMode {
             healthProvider = MockHealthProvider()
@@ -91,6 +101,19 @@ final class AppEnvironment {
         } else {
             healthProvider = MockHealthProvider()
         }
+    }
+
+    /// 重建附近餐厅服务：Demo 模式 / UI 测试走 Mock；否则 Keychain Key 优先，回退内置 Key。
+    func refreshNearbyService() {
+        let forceMock = demoMode
+            || ProcessInfo.processInfo.environment["CARELOOP_FORCE_CLOUD_AGENT"] == "1"
+        if forceMock {
+            nearbyFoodService = MockNearbyFoodService()
+            return
+        }
+        let storedKey = KeychainStore.load(key: AmapServiceConfig.keychainKey, service: AmapServiceConfig.keychainService)
+        let key = storedKey.isEmpty ? AmapServiceConfig.bundledKey : storedKey
+        nearbyFoodService = NearbyFoodService(client: AmapMCPClient(apiKey: key), location: coreLocationProvider)
     }
 
     func currentLLM() -> any LLMProviding {
@@ -128,22 +151,25 @@ final class AppEnvironment {
             .hba1c, .totalCholesterol, .ldlCholesterol, .hdlCholesterol,
             .triglycerides, .waistCircumference, .bodyMass,
         ]
+        let latestLabs = LabMetricStore.latestLabMetrics(context: context)
         var baselines: [BaselineResult] = []
         var todayMetrics: [HealthMetric] = []
         var history: [ClinicalHistoryPoint] = []
+        var snapshotEntries: [BaselineSnapshotStore.Entry] = []
         for type in types {
-            let series = await healthProvider.dailySeries(type, days: 14)
+            var series = await healthProvider.dailySeries(type, days: 14)
+            // 化验指标（hba1c、血脂）在 HealthKit 无来源：真机上序列由化验单 OCR/手动录入补齐，
+            // demo 模式保留 Mock 剧本数据，仅当 Provider 序列为空时回退本地录入。
+            if type.dataSource == .labEntry, series.isEmpty {
+                series = LabMetricStore.historySeries(type: type, context: context)
+            }
             let result = BaselineEngine.evaluate(type: type, series: series)
             baselines.append(result)
-            let snap = BaselineSnapshot(
-                metricType: type,
-                windowDays: result.windowDays,
-                mean: result.mean,
-                stdDev: result.stdDev
-            )
-            context.insert(snap)
+            snapshotEntries.append(BaselineSnapshotStore.Entry(result: result, sampleCount: series.count))
             if let metric = await healthProvider.metric(type, on: Date()) {
                 todayMetrics.append(metric)
+            } else if let lab = latestLabs[type] {
+                todayMetrics.append(lab)
             }
             if let key = type.clinicalKey {
                 for point in series {
@@ -160,6 +186,8 @@ final class AppEnvironment {
                 }
             }
         }
+        BaselineSnapshotStore.replaceToday(context: context, entries: snapshotEntries)
+
         let logs = (try? context.fetch(FetchDescriptor<DailyLogEntry>())) ?? []
         let todayLogs = logs.filter { Calendar.current.isDateInToday($0.createdAt) }
         let symptoms = todayLogs.flatMap(\.symptoms)
@@ -279,6 +307,30 @@ final class AppEnvironment {
     private func persistSelection() {
         if let data = try? JSONEncoder().encode(activeSelection) {
             UserDefaults.standard.set(data, forKey: ActiveModelSelection.storageKey)
+        }
+    }
+
+    /// 校验持久化的模型选择：Provider 不存在/被停用 → 回落到有模型的 Provider；
+    /// 模型 ID 不在该 Provider 目录 → 取第一个。修复跨启动的陈旧选择
+    /// （如删过的自定义 Provider、已下线的模型）导致的请求 404。
+    private func sanitizeActiveSelectionIfNeeded() {
+        let manager = ProviderManager(context: context)
+        let enabled = manager.providers().filter(\.enabled)
+        if !enabled.contains(where: { $0.key == activeSelection.providerKey }) {
+            if let fallback = enabled.first(where: { !manager.models(providerKey: $0.key).isEmpty }) {
+                activeSelection = ActiveModelSelection(
+                    providerKey: fallback.key,
+                    modelID: manager.models(providerKey: fallback.key).first?.modelID ?? ""
+                )
+            } else {
+                activeSelection = ActiveModelSelection(providerKey: "deepseek", modelID: "deepseek-chat")
+            }
+            return
+        }
+        let modelIDs = Set(manager.models(providerKey: activeSelection.providerKey).map(\.modelID))
+        if !modelIDs.contains(activeSelection.modelID),
+           let first = manager.models(providerKey: activeSelection.providerKey).first {
+            activeSelection.modelID = first.modelID
         }
     }
 }

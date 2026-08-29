@@ -9,13 +9,17 @@ struct DietChatView: View {
 
     @State private var input = ""
     @State private var messages: [BaobaoMessage] = []
-    @State private var isThinking = false
+    @State private var phase: AgentPhase = .idle
+    @State private var toolProgress: [ToolProgressItem] = []
+    @State private var streamingText = ""
+    @State private var sendTask: Task<Void, Never>?
     @State private var selection: BaobaoSelection?
     @State private var showClearConfirm = false
     @State private var trendSummary = ""
     @State private var recentGlucose: String?
     @State private var recentBloodPressure: String?
     @State private var retainedAgent: (any DietAgentSession)?
+    @State private var retainedNearbyAgent: (any DietAgentSession)?
 
     var body: some View {
         NavigationStack {
@@ -59,6 +63,9 @@ struct DietChatView: View {
                 }
                 await prepareSession()
             }
+            .onDisappear {
+                sendTask?.cancel()
+            }
         }
     }
 
@@ -100,22 +107,23 @@ struct DietChatView: View {
                         bubble(for: message)
                             .id(message.id)
                     }
-                    if isThinking {
-                        ThinkingBubble()
-                            .id("thinking")
+                    if phase != .idle {
+                        AgentProgressBubble(phase: phase, tools: toolProgress, streamingText: streamingText)
+                            .id("progress")
                     }
                 }
                 .padding()
             }
             .onChange(of: messages.count) { _, _ in scrollToBottom(proxy) }
-            .onChange(of: isThinking) { _, _ in scrollToBottom(proxy) }
+            .onChange(of: phase) { _, _ in scrollToBottom(proxy) }
+            .onChange(of: streamingText) { _, _ in scrollToBottom(proxy) }
         }
     }
 
     private func scrollToBottom(_ proxy: ScrollViewProxy) {
         withAnimation {
-            if isThinking {
-                proxy.scrollTo("thinking", anchor: .bottom)
+            if phase != .idle {
+                proxy.scrollTo("progress", anchor: .bottom)
             } else if let id = messages.last?.id {
                 proxy.scrollTo(id, anchor: .bottom)
             }
@@ -137,7 +145,26 @@ struct DietChatView: View {
                 .frame(maxWidth: .infinity, alignment: .trailing)
         case .baobao:
             VStack(alignment: .leading, spacing: 8) {
-                if message.isConfirmation {
+                if message.isError {
+                    HStack(alignment: .top, spacing: 6) {
+                        Image(systemName: "wifi.exclamationmark")
+                            .font(.caption)
+                            .foregroundStyle(CareTheme.muted)
+                        Text(message.text)
+                            .font(CareTheme.body)
+                            .foregroundStyle(CareTheme.muted)
+                    }
+                    .padding(12)
+                    .background(
+                        RoundedRectangle(cornerRadius: 12, style: .continuous)
+                            .fill(Color(white: 0.96))
+                    )
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 12, style: .continuous)
+                            .stroke(CareTheme.muted.opacity(0.3), lineWidth: 1)
+                    )
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                } else if message.isConfirmation {
                     VStack(alignment: .leading, spacing: 6) {
                         Text(message.text)
                             .font(CareTheme.body)
@@ -174,6 +201,14 @@ struct DietChatView: View {
                                 .fill(.white)
                                 .shadow(color: CareTheme.ink.opacity(0.05), radius: 4, y: 1)
                         )
+                    if let pois = message.suggestedPOIs, !pois.isEmpty {
+                        VStack(alignment: .leading, spacing: 6) {
+                            ForEach(pois) { place in
+                                NearbyPlaceCard(place: place)
+                            }
+                        }
+                        .accessibilityIdentifier("careloop.diet.poiCards")
+                    }
                     if let recipes = message.suggestedRecipes, !recipes.isEmpty, selection == nil {
                         VStack(alignment: .leading, spacing: 6) {
                             HStack(spacing: 8) {
@@ -267,17 +302,34 @@ struct DietChatView: View {
                         .fill(CareTheme.track)
                         .frame(height: 1)
                 }
-            Button {
-                Task { await send() }
-            } label: {
-                Image(systemName: "paperplane.fill")
-                    .font(.subheadline.weight(.semibold))
-                    .foregroundStyle(.white)
-                    .frame(width: 36, height: 36)
-                    .background(Circle().fill(CareTheme.sage))
+                .accessibilityIdentifier("careloop.diet.input")
+            if phase == .idle {
+                Button {
+                    Task { await send() }
+                } label: {
+                    Image(systemName: "paperplane.fill")
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundStyle(.white)
+                        .frame(width: 36, height: 36)
+                        .background(Circle().fill(CareTheme.sage))
+                }
+                .buttonStyle(.plain)
+                .disabled(input.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+                .accessibilityLabel("发送")
+                .accessibilityIdentifier("careloop.diet.send")
+            } else {
+                Button {
+                    sendTask?.cancel()
+                } label: {
+                    Image(systemName: "stop.circle.fill")
+                        .font(.title3)
+                        .foregroundStyle(CareTheme.muted)
+                        .frame(width: 36, height: 36)
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel("停止生成")
+                .accessibilityIdentifier("careloop.diet.stop")
             }
-            .buttonStyle(.plain)
-            .disabled(input.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || isThinking)
         }
         .padding(.horizontal)
         .padding(.vertical, 10)
@@ -288,17 +340,31 @@ struct DietChatView: View {
 
     private func send() async {
         let trimmed = input.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !trimmed.isEmpty else { return }
+        guard !trimmed.isEmpty, phase == .idle else { return }
         input = ""
         messages.append(BaobaoMessage(role: .user, text: trimmed))
 
-        isThinking = true
         let profile = env.profile()
         let tags = profile.desensitizedTags()
         let safeRecipes = AdviceEngine.hardFilterRecipes(env.recipes, profile: tags, dietRules: env.dietRules)
-        let reply = await makeReply(to: trimmed, tags: tags, safeRecipes: safeRecipes)
-        isThinking = false
-        messages.append(reply)
+
+        // 关键词快捷分支（确认/全部拒绝/拒绝食材）保持同步直出。
+        if let quick = quickReply(to: trimmed, safeRecipes: safeRecipes) {
+            messages.append(quick)
+            return
+        }
+
+        let task = Task {
+            await runAgentStream(
+                to: trimmed,
+                tags: tags,
+                safeRecipes: safeRecipes,
+                isNearby: NearbyIntentDetector.isNearbyIntent(trimmed)
+            )
+        }
+        sendTask = task
+        await task.value
+        sendTask = nil
     }
 
     private func confirm(_ recipe: Recipe) {
@@ -313,7 +379,8 @@ struct DietChatView: View {
         )
     }
 
-    private func makeReply(to text: String, tags: ProfileTags, safeRecipes: [Recipe]) async -> BaobaoMessage {
+    /// 关键词快捷回复；命中返回消息，未命中返回 nil 走流式 Agent。
+    private func quickReply(to text: String, safeRecipes: [Recipe]) -> BaobaoMessage? {
         // 确认场景：用户说"就这个吧"
         if BaobaoPersona.confirmWords.contains(where: { text.contains($0) }) {
             let lastSuggested = messages.last(where: { $0.suggestedRecipes?.isEmpty == false })?.suggestedRecipes
@@ -354,8 +421,12 @@ struct DietChatView: View {
                 suggestedRecipes: picks
             )
         }
+        return nil
+    }
 
-        // 一般提问：走饮食助手，用安全候选组织回答
+    /// 一般提问：走流式饮食助手，边生成边上屏。
+    /// isNearby：附近意图固定走云端 Agent（search_nearby_food 工具只在云端工具循环挂载）。
+    private func runAgentStream(to text: String, tags: ProfileTags, safeRecipes: [Recipe], isNearby: Bool = false) async {
         let alerts = (try? env.context.fetch(FetchDescriptor<AlertRecord>())) ?? []
         let logs = (try? env.context.fetch(FetchDescriptor<DailyLogEntry>())) ?? []
         let profile = env.profile()
@@ -372,17 +443,80 @@ struct DietChatView: View {
             recentBloodPressure: recentBloodPressure,
             currentMedicationNames: profile.currentMedicationNames
         )
-        let agent = retainedAgent ?? DietAgentFactory.make(llm: env.currentLLM())
-        retainedAgent = agent
-        if let response = try? await agent.respond(to: text, context: context) {
-            let cited = safeRecipes.filter { response.citedRecipeIDs.contains($0.id) }
-            return BaobaoMessage(
-                role: .baobao,
-                text: response.reply,
-                suggestedRecipes: Array(cited.prefix(2))
-            )
+        let agent: any DietAgentSession
+        if isNearby {
+            if let cached = retainedNearbyAgent {
+                agent = cached
+            } else {
+                agent = DietAgentFactory.make(llm: env.currentLLM(), nearby: env.nearbyFoodService, preferOnDevice: false)
+                retainedNearbyAgent = agent
+            }
+        } else {
+            agent = retainedAgent ?? DietAgentFactory.make(llm: env.currentLLM())
+            retainedAgent = agent
         }
-        return BaobaoMessage(role: .baobao, text: BaobaoPersona.noMatchReply)
+
+        phase = .thinking
+        toolProgress = []
+        streamingText = ""
+        defer {
+            phase = .idle
+            toolProgress = []
+            streamingText = ""
+        }
+
+        do {
+            var gotFinal = false
+            for try await event in agent.streamRespond(to: text, context: context) {
+                switch event {
+                case .toolStarted(let name, let label):
+                    // 工具轮开始时清掉模型先吐的草稿文本，正式答案稍后重新流式上屏。
+                    streamingText = ""
+                    phase = .thinking
+                    if let index = toolProgress.firstIndex(where: { $0.name == name }) {
+                        toolProgress[index].isDone = false
+                    } else {
+                        toolProgress.append(ToolProgressItem(name: name, label: label))
+                    }
+                case .toolFinished(let name):
+                    if let index = toolProgress.firstIndex(where: { $0.name == name }) {
+                        toolProgress[index].isDone = true
+                    }
+                case .replyDelta(let delta):
+                    phase = .streaming
+                    streamingText += delta
+                case .finished(let response):
+                    gotFinal = true
+                    let cited = safeRecipes.filter { response.citedRecipeIDs.contains($0.id) }
+                    messages.append(
+                        BaobaoMessage(
+                            role: .baobao,
+                            text: response.reply,
+                            suggestedRecipes: Array(cited.prefix(2)),
+                            suggestedPOIs: response.citedPOIs.isEmpty ? nil : response.citedPOIs
+                        )
+                    )
+                }
+            }
+            // AsyncThrowingStream 取消时常以正常结束收尾而非抛错：
+            // 有部分文本且没等到最终结果时，按“已停止生成”保留。
+            if Task.isCancelled, !gotFinal, !streamingText.isEmpty {
+                messages.append(BaobaoMessage(role: .baobao, text: streamingText + "\n（已停止生成）", isInterrupted: true))
+            }
+        } catch is CancellationError {
+            if !streamingText.isEmpty {
+                messages.append(BaobaoMessage(role: .baobao, text: streamingText + "\n（已停止生成）", isInterrupted: true))
+            }
+        } catch {
+            let detail = (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
+            if !streamingText.isEmpty {
+                messages.append(
+                    BaobaoMessage(role: .baobao, text: streamingText + "\n（回复中断：\(detail)）", isInterrupted: true)
+                )
+            } else {
+                messages.append(BaobaoMessage(role: .baobao, text: "网络似乎不太顺畅（\(detail)），稍后再试一次吧。", isError: true))
+            }
+        }
     }
 
     private func prepareSession() async {
@@ -431,7 +565,85 @@ struct BaobaoMessage: Identifiable {
     var role: Role
     var text: String
     var suggestedRecipes: [Recipe]? = nil
+    var suggestedPOIs: [NearbyPlace]? = nil
     var isConfirmation = false
+    var isError = false
+    var isInterrupted = false
+}
+
+// MARK: - 生成阶段与工具进度
+
+enum AgentPhase: Equatable {
+    case idle
+    case thinking
+    case streaming
+}
+
+struct ToolProgressItem: Identifiable, Equatable {
+    let name: String
+    let label: String
+    var isDone = false
+    var id: String { name }
+}
+
+/// 生成中的进度气泡：工具调用 chip（进行中/已完成）+ 流式文本。
+struct AgentProgressBubble: View {
+    let phase: AgentPhase
+    let tools: [ToolProgressItem]
+    let streamingText: String
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            if !tools.isEmpty {
+                VStack(alignment: .leading, spacing: 5) {
+                    ForEach(tools) { tool in
+                        HStack(spacing: 6) {
+                            if tool.isDone {
+                                Image(systemName: "checkmark.circle.fill")
+                                    .font(.caption)
+                                    .foregroundStyle(CareTheme.sage)
+                            } else {
+                                ProgressView()
+                                    .controlSize(.mini)
+                            }
+                            Text(tool.label)
+                                .font(.caption)
+                                .foregroundStyle(tool.isDone ? CareTheme.muted : CareTheme.ink)
+                        }
+                        .padding(.horizontal, 10)
+                        .padding(.vertical, 5)
+                        .background(
+                            Capsule().fill(Color(white: 0.965))
+                        )
+                    }
+                }
+                .accessibilityIdentifier("careloop.diet.toolstatus")
+            }
+            if !streamingText.isEmpty {
+                HStack(alignment: .bottom, spacing: 2) {
+                    Text(streamingText)
+                        .font(CareTheme.body)
+                        .foregroundStyle(CareTheme.ink)
+                    // 光标：流式进行中的视觉信号。
+                    RoundedRectangle(cornerRadius: 1)
+                        .fill(CareTheme.sage)
+                        .frame(width: 2, height: 16)
+                        .opacity(phase == .streaming ? 1 : 0)
+                }
+                .padding(12)
+                .background(
+                    RoundedRectangle(cornerRadius: 12, style: .continuous)
+                        .fill(.white)
+                        .shadow(color: CareTheme.ink.opacity(0.05), radius: 4, y: 1)
+                )
+                .accessibilityIdentifier("careloop.diet.streamingReply")
+            } else if tools.isEmpty {
+                ThinkingBubble()
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .accessibilityIdentifier("careloop.diet.progress")
+    }
 }
 
 // MARK: - 跳跃省略号气泡

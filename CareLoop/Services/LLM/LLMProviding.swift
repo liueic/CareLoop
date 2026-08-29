@@ -60,17 +60,47 @@ struct LLMConversationResponse: Sendable {
     var finishReason: String?
 }
 
+/// 流式对话事件：文本增量、本轮拼接完成的工具调用、收尾。
+enum LLMStreamEvent: Sendable {
+    case textDelta(String)
+    case toolCalls([LLMToolCall])
+    case finished(LLMConversationResponse)
+}
+
 protocol LLMProviding: Sendable {
     var supportsVision: Bool { get }
     var supportsToolCall: Bool { get }
     func complete(prompt: LLMPrompt) async throws -> LLMCompletion
     func completeConversation(_ request: LLMConversationRequest) async throws -> LLMConversationResponse
+    func streamConversation(_ request: LLMConversationRequest) -> AsyncThrowingStream<LLMStreamEvent, Error>
     func listModels() async throws -> [String]
     func ping(modelID: String) async throws -> TimeInterval
 }
 
 extension LLMProviding {
     var supportsToolCall: Bool { false }
+
+    /// 默认实现：不支持流式的 Provider 一次性回放完整结果。
+    func streamConversation(_ request: LLMConversationRequest) -> AsyncThrowingStream<LLMStreamEvent, Error> {
+        AsyncThrowingStream { continuation in
+            let task = Task {
+                do {
+                    let response = try await completeConversation(request)
+                    if let text = response.message.content, !text.isEmpty {
+                        continuation.yield(.textDelta(text))
+                    }
+                    if !response.message.toolCalls.isEmpty {
+                        continuation.yield(.toolCalls(response.message.toolCalls))
+                    }
+                    continuation.yield(.finished(response))
+                    continuation.finish()
+                } catch {
+                    continuation.finish(throwing: error)
+                }
+            }
+            continuation.onTermination = { _ in task.cancel() }
+        }
+    }
 
     func completeConversation(_ request: LLMConversationRequest) async throws -> LLMConversationResponse {
         let history = request.messages.map { msg -> String in
@@ -98,60 +128,6 @@ extension LLMProviding {
             modelID: completion.modelID,
             finishReason: "stop"
         )
-    }
-}
-
-struct OpenAIChatRequest: Encodable {
-    var model: String
-    var messages: [Message]
-    var max_tokens: Int?
-    var temperature: Double?
-
-    struct Message: Encodable {
-        var role: String
-        var content: Content
-
-        enum Content: Encodable {
-            case text(String)
-            case parts([Part])
-
-            func encode(to encoder: Encoder) throws {
-                var container = encoder.singleValueContainer()
-                switch self {
-                case .text(let text):
-                    try container.encode(text)
-                case .parts(let parts):
-                    try container.encode(parts)
-                }
-            }
-        }
-
-        struct Part: Encodable {
-            var type: String
-            var text: String?
-            var image_url: ImageURL?
-
-            struct ImageURL: Encodable {
-                var url: String
-            }
-        }
-    }
-}
-
-struct OpenAIChatResponse: Decodable {
-    var choices: [Choice]?
-    struct Choice: Decodable {
-        var message: Message?
-        struct Message: Decodable {
-            var content: String?
-        }
-    }
-}
-
-struct OpenAIModelList: Decodable {
-    var data: [Item]
-    struct Item: Decodable {
-        var id: String
     }
 }
 

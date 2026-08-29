@@ -15,7 +15,9 @@
 	<key>NSPhotoLibraryAddUsageDescription</key>
 	<string>允许将带水印的手帐照片保存到相册。</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>可选：在水印中显示拍摄地点。默认关闭，可随时在设置中关闭。</string>
+	<string>用于在您询问附近美食时获取当前位置、搜索周边餐厅，以及可选择在水印照片中显示拍摄地点。位置信息只用于本地搜索，不会与健康数据一起发送。</string>
+	<key>AmapDefaultKey</key>
+	<string>$(AMAP_MCP_KEY)</string>
 	<key>UIBackgroundModes</key>
 	<array/>
 </dict>

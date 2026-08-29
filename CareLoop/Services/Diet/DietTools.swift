@@ -44,6 +44,8 @@ struct DietAgentResponse: Equatable, Sendable {
     var reply: String
     var citedRecipeIDs: [String]
     var citedClauseIDs: [String]
+    /// 附近餐厅引用（来自 search_nearby_food 工具返回的 POI）。
+    var citedPOIs: [NearbyPlace] = []
     var usedLLM: Bool
     var degraded: Bool
     var disclaimer: String
@@ -195,30 +197,37 @@ enum DietTools: Sendable {
         citedClauseIDs: [String],
         allowedRecipeIDs: Set<String>,
         allowedClauseIDs: Set<String>,
-        guardrailRules: GuidelineRules
+        guardrailRules: GuidelineRules,
+        citedPOIIDs: [String] = [],
+        allowedPOIIDs: Set<String> = []
     ) -> Bool {
+        // 食谱或 POI 至少引用其一：引用了 POI 时按 POI 集合校验（含黑名单），
+        // 否则保持原有「必须引用安全食谱」约束，向后兼容无附近工具的路径。
+        let citeIDs = citedRecipeIDs.isEmpty ? citedPOIIDs : citedRecipeIDs
+        let citeAllowed = citedRecipeIDs.isEmpty ? allowedPOIIDs : allowedRecipeIDs
         guard AdviceEngine.postValidate(
             text: text,
-            citedIDs: citedRecipeIDs,
-            allowedIDs: allowedRecipeIDs,
+            citedIDs: citeIDs,
+            allowedIDs: citeAllowed,
             rules: guardrailRules
         ) else { return false }
         guard !citedClauseIDs.isEmpty else { return true }
         return citedClauseIDs.allSatisfy { allowedClauseIDs.contains($0) }
     }
 
-    static func parseAgentJSON(_ text: String) -> (reply: String, recipeIDs: [String], clauseIDs: [String]) {
+    static func parseAgentJSON(_ text: String) -> (reply: String, recipeIDs: [String], clauseIDs: [String], poiIDs: [String]) {
         if let data = text.data(using: .utf8),
            let obj = try? JSONSerialization.jsonObject(with: data) as? [String: Any] {
             let reply = obj["reply"] as? String ?? obj["body"] as? String ?? text
             let recipeIDs = obj["citedRecipeIDs"] as? [String] ?? obj["citedIDs"] as? [String] ?? []
             let clauseIDs = obj["citedClauseIDs"] as? [String] ?? []
-            return (reply, recipeIDs, clauseIDs)
+            let poiIDs = obj["citedPOIIDs"] as? [String] ?? []
+            return (reply, recipeIDs, clauseIDs, poiIDs)
         }
         if let start = text.firstIndex(of: "{"), let end = text.lastIndex(of: "}") {
             return parseAgentJSON(String(text[start...end]))
         }
-        return (text, [], [])
+        return (text, [], [], [])
     }
 
     private static func formatMetric(_ value: Double, decimals: Int = 1) -> String {

@@ -35,6 +35,9 @@ enum CatalogSyncService {
                 let modalities = model["modalities"] as? [String: Any]
                 let inputs = (modalities?["input"] as? [String]) ?? []
                 let vision = inputs.contains("image") || (model["attachment"] as? Bool == true)
+                let toolCall = (model["tool_call"] as? Bool) ?? true
+                let reasoning = (model["reasoning"] as? Bool) ?? false
+                let knowledge = model["knowledge"] as? String ?? ""
                 let cost = model["cost"] as? [String: Any]
                 let inputPrice = doubleValue(cost?["input"]) ?? 0
                 let outputPrice = doubleValue(cost?["output"]) ?? 0
@@ -43,8 +46,11 @@ enum CatalogSyncService {
                     found.contextWindow = contextWindow
                     found.maxOutputTokens = maxOut
                     found.supportsVision = vision
+                    found.supportsToolCall = toolCall
+                    found.supportsReasoning = reasoning
                     found.inputPrice = inputPrice
                     found.outputPrice = outputPrice
+                    found.knowledgeCutoff = knowledge
                     found.source = .synced
                     found.lastSyncedAt = Date()
                     found.metadataUnknown = false
@@ -56,11 +62,11 @@ enum CatalogSyncService {
                         contextWindow: contextWindow,
                         maxOutputTokens: maxOut,
                         supportsVision: vision,
-                        supportsToolCall: false,
-                        supportsReasoning: false,
+                        supportsToolCall: toolCall,
+                        supportsReasoning: reasoning,
                         inputPrice: inputPrice,
                         outputPrice: outputPrice,
-                        knowledgeCutoff: "",
+                        knowledgeCutoff: knowledge,
                         source: .synced
                     )
                     entry.lastSyncedAt = Date()

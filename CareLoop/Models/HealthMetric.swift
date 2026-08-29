@@ -1,5 +1,13 @@
 import Foundation
 
+/// 指标数据的来源通道：
+/// - healthKit: 由 HealthKitProvider 直接或派生读取（含手表采集）。
+/// - labEntry: HealthKit 公开 API 不提供（hba1c、血脂四项），只能通过化验单 OCR 或手动录入。
+enum MetricDataSource: String, Codable, Sendable, Hashable {
+    case healthKit
+    case labEntry
+}
+
 enum MetricType: String, Codable, CaseIterable, Sendable, Identifiable {
     case stepCount
     case restingHeartRate
@@ -29,6 +37,23 @@ enum MetricType: String, Codable, CaseIterable, Sendable, Identifiable {
     case waistCircumference
 
     var id: String { rawValue }
+
+    var dataSource: MetricDataSource {
+        switch self {
+        case .hba1c, .totalCholesterol, .ldlCholesterol, .hdlCholesterol, .triglycerides:
+            .labEntry
+        default:
+            .healthKit
+        }
+    }
+
+    static var healthKitTypes: Set<MetricType> {
+        Set(allCases.filter { $0.dataSource == .healthKit })
+    }
+
+    static var labEntryTypes: Set<MetricType> {
+        Set(allCases.filter { $0.dataSource == .labEntry })
+    }
 
     var displayName: String {
         switch self {

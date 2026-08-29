@@ -3,6 +3,8 @@ import Foundation
 protocol HealthDataProviding: Sendable {
     var sourceLabel: String { get }
     func requestAuthorization() async throws
+    /// 用户尚未对健康权限做出选择时为 true（Mock 恒为 false）。
+    func authorizationNeedsRequest() async -> Bool
     func characteristics() async -> CharacteristicSnapshot
     func metric(_ type: MetricType, on day: Date) async -> HealthMetric?
     func dailySeries(_ type: MetricType, days: Int) async -> [DailyMetricPoint]
@@ -10,6 +12,8 @@ protocol HealthDataProviding: Sendable {
 }
 
 extension HealthDataProviding {
+    func authorizationNeedsRequest() async -> Bool { false }
+
     func watermarkSnapshot(at date: Date) async -> WatermarkSnapshot {
         let cal = Calendar.current
         let day = cal.startOfDay(for: date)

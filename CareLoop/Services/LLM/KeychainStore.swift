@@ -2,12 +2,12 @@ import Foundation
 import Security
 
 enum KeychainStore {
-    static func save(key: String, secret: String) {
+    static func save(key: String, secret: String, service: String = "CareLoop.LLM") {
         let data = Data(secret.utf8)
         let query: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
             kSecAttrAccount as String: key,
-            kSecAttrService as String: "CareLoop.LLM",
+            kSecAttrService as String: service,
         ]
         SecItemDelete(query as CFDictionary)
         var add = query
@@ -16,11 +16,11 @@ enum KeychainStore {
         SecItemAdd(add as CFDictionary, nil)
     }
 
-    static func load(key: String) -> String {
+    static func load(key: String, service: String = "CareLoop.LLM") -> String {
         let query: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
             kSecAttrAccount as String: key,
-            kSecAttrService as String: "CareLoop.LLM",
+            kSecAttrService as String: service,
             kSecReturnData as String: true,
             kSecMatchLimit as String: kSecMatchLimitOne,
         ]
@@ -30,11 +30,11 @@ enum KeychainStore {
         return String(data: data, encoding: .utf8) ?? ""
     }
 
-    static func delete(key: String) {
+    static func delete(key: String, service: String = "CareLoop.LLM") {
         let query: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
             kSecAttrAccount as String: key,
-            kSecAttrService as String: "CareLoop.LLM",
+            kSecAttrService as String: service,
         ]
         SecItemDelete(query as CFDictionary)
     }

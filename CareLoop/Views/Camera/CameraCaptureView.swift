@@ -11,7 +11,7 @@ struct CameraCaptureView: View {
         var id: String { rawValue }
     }
 
-    private let docHintOptions = ["检验报告", "病历", "出院小结", "处方单", "诊断证明"]
+    private let docHintOptions = ["检验报告", "病历", "出院小结", "处方单", "药房小票", "药盒", "诊断证明"]
 
     @Environment(\.dismiss) private var dismiss
     @Environment(AppEnvironment.self) private var env
@@ -457,26 +457,11 @@ struct CameraCaptureView: View {
             entry.aiExplanation = result.summary
             env.context.insert(entry)
 
-            let prescribedDate = parseDate(result.takenAt)
+            let prescribedDate = PrescriptionParser.parseDate(result.takenAt)
 
-            for ext in result.medications {
-                let existing = (try? env.context.fetch(FetchDescriptor<Medication>())) ?? []
-                if existing.contains(where: { $0.name == ext.name }) { continue }
-                let freq = ext.frequencyPerDay ?? parseFrequency(ext.frequency) ?? 1
-                let times = ext.timesOfDay ?? defaultTimes(for: freq)
-                let med = Medication(
-                    name: ext.name,
-                    dosePerTime: ext.dose ?? "",
-                    frequencyPerDay: freq,
-                    timesOfDay: times,
-                    cautions: ext.cautions ?? "",
-                    source: .medicalDocOCR,
-                    prescribedDate: prescribedDate
-                )
-                env.context.insert(med)
-            }
+            MedicationImporter.importMedications(from: result, into: env.context, source: .medicalDocOCR)
 
-            if let dateStr = result.followUpDate, let followDate = parseDate(dateStr) {
+            if let dateStr = result.followUpDate, let followDate = PrescriptionParser.parseDate(dateStr) {
                 let followUp = FollowUp(
                     mode: .doctorOrdered,
                     date: followDate,
@@ -493,34 +478,6 @@ struct CameraCaptureView: View {
         } catch {
             errorText = "保存失败"
         }
-    }
-
-    private func parseFrequency(_ text: String?) -> Int? {
-        guard let text else { return nil }
-        let lower = text.lowercased()
-        if lower.contains("tid") || lower.contains("每日3次") || lower.contains("一天3次") { return 3 }
-        if lower.contains("bid") || lower.contains("每日2次") || lower.contains("一天2次") { return 2 }
-        if lower.contains("qd") || lower.contains("每日1次") || lower.contains("一天1次") { return 1 }
-        if let match = text.first(where: { $0.isNumber }) {
-            return Int(String(match))
-        }
-        return nil
-    }
-
-    private func defaultTimes(for frequency: Int) -> [String] {
-        switch frequency {
-        case 1: ["08:00"]
-        case 2: ["08:00", "20:00"]
-        case 3: ["08:00", "14:00", "20:00"]
-        default: [String](repeating: "08:00", count: max(1, frequency))
-        }
-    }
-
-    private func parseDate(_ text: String?) -> Date? {
-        guard let text else { return nil }
-        let fmt = ISO8601DateFormatter()
-        fmt.formatOptions = [.withFullDate]
-        return fmt.date(from: text)
     }
 
     private func importPicked(_ item: PhotosPickerItem?) async {

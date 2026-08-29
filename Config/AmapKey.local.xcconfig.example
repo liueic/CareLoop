@@ -1,0 +1,3 @@
+// 复制本文件为 AmapKey.local.xcconfig 并填入你的高德 Key（Web 服务类型）。
+// 申请入口：https://console.amap.com/dev/key/app
+AMAP_MCP_KEY = 你的高德Web服务Key

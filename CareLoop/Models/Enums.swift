@@ -291,6 +291,10 @@ struct MedicalDocResult: Codable, Hashable, Sendable {
     var followUpDate: String?
     var followUpDepartment: String?
     var summary: String
+    /// 开方医院/药房名称（处方类文档）。
+    var hospitalName: String? = nil
+    /// 开方医师姓名（处方类文档）。
+    var doctorName: String? = nil
 }
 
 struct LabValueItem: Codable, Hashable, Sendable {
@@ -308,4 +312,10 @@ struct ExtractedMedication: Codable, Hashable, Sendable {
     var timesOfDay: [String]?
     var frequencyPerDay: Int?
     var cautions: String?
+    /// 药品规格，如 "5mg×24片"。
+    var spec: String? = nil
+    /// 发药数量，如 "2盒"。
+    var quantity: String? = nil
+    /// 疗程，如 "7天"。
+    var durationText: String? = nil
 }

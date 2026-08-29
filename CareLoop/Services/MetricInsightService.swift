@@ -196,7 +196,7 @@ enum MetricInsightService {
         说明用户当前值落在从“安全区”到“风险区”的哪个位置。
         5. 行动建议：结合用户病种画像，给出 2–3 条生活方式层面的初步建议，并提醒咨询医生。
         """
-        return LLMPrompt(system: Self.sharedSystemPrompt, user: user, images: [], maxTokens: 900)
+        return LLMPrompt(system: Self.sharedSystemPrompt, user: user, images: [], maxTokens: 2048)
     }
 
     // MARK: 代谢综合征组合
@@ -225,7 +225,7 @@ enum MetricInsightService {
         4. 行动建议：结合用户的病种画像与医嘱，给出初步的生活方式调整建议（饮食、运动），\
         并把“尽快咨询医生、制定个性化干预方案”列为首要任务。
         """
-        return LLMPrompt(system: Self.sharedSystemPrompt, user: user, images: [], maxTokens: 1200)
+        return LLMPrompt(system: Self.sharedSystemPrompt, user: user, images: [], maxTokens: 2048)
     }
 
     // MARK: 生成入口

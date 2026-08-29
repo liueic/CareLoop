@@ -11,3 +11,8 @@ data/*.sqlite-journal
 data/*.sqlite-wal
 data/raw/
 data/work/
+.mimosa/
+.zcode/
+
+# 高德 Key 本地覆盖（不入 git）
+Config/AmapKey.local.xcconfig

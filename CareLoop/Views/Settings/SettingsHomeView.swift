@@ -3,9 +3,12 @@ import SwiftUI
 
 struct SettingsHomeView: View {
     @Environment(AppEnvironment.self) private var env
+    @Environment(\.openURL) private var openURL
     @Query private var profiles: [UserProfile]
     @State private var hour = 19
     @State private var minute = 30
+    @State private var amapKeyDraft = ""
+    @State private var amapKeyNote = ""
 
     var body: some View {
         NavigationStack {
@@ -42,6 +45,9 @@ struct SettingsHomeView: View {
                 Section("模型服务") {
                     NavigationLink("Provider 与模型目录") { ModelServiceView() }
                 }
+                Section("地图服务") {
+                    amapKeySection
+                }
                 Section("关于") {
                     DisclaimerBanner()
                     Text("MVP v0.1 · 慢病日常管理工具")
@@ -49,6 +55,51 @@ struct SettingsHomeView: View {
                 }
             }
             .navigationTitle("我的")
+        }
+    }
+
+    // MARK: 高德 MCP Key 配置
+
+    @ViewBuilder
+    private var amapKeySection: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            SecureField("高德 Key（Web 服务，可留空用内置）", text: $amapKeyDraft)
+                .font(.caption)
+            HStack {
+                Button("保存 Key") {
+                    let trimmed = amapKeyDraft.trimmingCharacters(in: .whitespacesAndNewlines)
+                    if trimmed.isEmpty {
+                        KeychainStore.delete(key: AmapServiceConfig.keychainKey, service: AmapServiceConfig.keychainService)
+                    } else {
+                        KeychainStore.save(
+                            key: AmapServiceConfig.keychainKey,
+                            secret: trimmed,
+                            service: AmapServiceConfig.keychainService
+                        )
+                    }
+                    env.refreshNearbyService()
+                    amapKeyNote = trimmed.isEmpty ? "已清除自定义 Key" : "Key 已保存"
+                }
+                .font(.caption.weight(.semibold))
+                Spacer()
+                Button("申请高德 Key") {
+                    openURL(URL(string: "https://console.amap.com/dev/key/app")!)
+                }
+                .font(.caption)
+            }
+            Text(amapKeyNote)
+                .font(.caption2)
+                .foregroundStyle(CareTheme.muted)
+            Text("用于「饱饱」的附近餐厅搜索（高德 MCP 服务）。仅发送当前位置与搜索关键词，不发送任何健康数据；Key 保存在本机 Keychain。")
+                .font(.caption2)
+                .foregroundStyle(CareTheme.muted)
+        }
+        .onAppear {
+            let stored = KeychainStore.load(key: AmapServiceConfig.keychainKey, service: AmapServiceConfig.keychainService)
+            amapKeyDraft = stored
+            amapKeyNote = stored.isEmpty
+                ? (AmapServiceConfig.bundledKey.isEmpty ? "未配置：附近搜索不可用" : "使用内置默认 Key")
+                : "使用自定义 Key"
         }
     }
 }

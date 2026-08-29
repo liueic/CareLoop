@@ -39,6 +39,7 @@ enum MedicalDocumentAnalyzer {
         frequencyPerDay：从频次文本提取数字，如"每日2次"→2，"bid"→2，"tid"→3。
         followUpDate：从复诊提示中推算具体日期。如"两周后"则从 takenAt 起算。
         不要编造文档中不存在的信息。
+        \(Self.prescriptionInstructions(for: docHint))
         """
 
         var userText = "OCR 提取的文本：\n\(ocrText.isEmpty ? "（无法识别文字，请仅根据图片分析）" : ocrText)"
@@ -55,11 +56,28 @@ enum MedicalDocumentAnalyzer {
             system: system,
             user: userText,
             images: images,
-            maxTokens: 1200
+            maxTokens: 2048
         )
 
         let completion = try await llm.complete(prompt: prompt)
         return try parse(completion.text)
+    }
+
+    /// 处方类文档（处方笺/药房小票/药盒）的补充提取要求；非处方文档返回空串。
+    private static func prescriptionInstructions(for docHint: String) -> String {
+        guard docHint.contains("处方") || docHint.contains("小票") || docHint.contains("药盒") else {
+            return ""
+        }
+        return """
+        处方类文档补充要求：
+        - medications 逐项提取 Rp/药品清单：name（药名）、spec（规格如 5mg×24片）、quantity（数量如 2盒）、\
+        dose（单次剂量，从用法用量提取如 1片）、frequency（用法原文如"每日3次，每次1片，餐前服"）、\
+        frequencyPerDay、timesOfDay、durationText（疗程如 7天，无则 null）、cautions（药师嘱托）。
+        - 额外返回 hospitalName（医院/药房名称或 null）与 doctorName（开方医师或 null）。
+        - 药名必须逐字来自图片或 OCR 文本；字迹模糊无法确认时 name 返回"未识别药品"并在 cautions 注明"药名不清晰，请人工核对"，\
+        禁止根据药品外观推测药名。
+        - 药房小票中的非药品行（收银、会员、赠品）不要放进 medications。
+        """
     }
 
     private static func parse(_ text: String) throws -> MedicalDocResult {

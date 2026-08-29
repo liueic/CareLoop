@@ -1,5 +1,6 @@
 import AVFoundation
 import Foundation
+import OpenAI
 
 @MainActor
 final class SpeechService {
@@ -8,6 +9,9 @@ final class SpeechService {
     private var baseURL: URL?
     private var apiKey: String?
     private var isRecording = false
+    private var converter: AVAudioConverter?
+    /// 实际写入 WAV 头的采样率——必须与 tap 产出的数据一致。
+    private var activeSampleRate: Double = 16000
 
     func configure(baseURL: URL?, apiKey: String) {
         self.baseURL = baseURL
@@ -29,17 +33,19 @@ final class SpeechService {
         try audioSession.setCategory(.record, mode: .measurement, options: .duckOthers)
         try audioSession.setActive(true, options: .notifyOthersOnDeactivation)
         let input = engine.inputNode
-        let format = input.outputFormat(forBus: 0)
-        input.removeTap(onBus: 0)
-        input.installTap(onBus: 0, bufferSize: 1024, format: format) { [weak self] buffer, _ in
-            guard let self else { return }
-            let audioData = buffer.audioBufferList.pointee.mBuffers
-            if let ptr = audioData.mData {
-                let data = Data(bytes: ptr, count: Int(audioData.mDataByteSize))
-                Task { @MainActor in
-                    self.audioBuffer.append(data)
-                }
-            }
+        let nativeFormat = input.outputFormat(forBus: 0)
+        guard let targetFormat = AVAudioFormat(standardFormatWithSampleRate: 16000, channels: 1) else {
+            throw NSError(domain: "CareLoop.Speech", code: 1, userInfo: [NSLocalizedDescriptionKey: "无法创建 16kHz 目标格式"])
+        }
+        activeSampleRate = 16000
+
+        if nativeFormat.sampleRate == targetFormat.sampleRate, nativeFormat.channelCount == targetFormat.channelCount {
+            installTap(format: nativeFormat, convertingTo: nil)
+        } else {
+            // 硬件原生采样率（iPhone 通常 48kHz）必须实时重采样到 16kHz 单声道，
+            // 否则 WAV 头与数据错配，音频被拉长变调，转写质量明显受损。
+            converter = AVAudioConverter(from: nativeFormat, to: targetFormat)
+            installTap(format: nativeFormat, convertingTo: targetFormat)
         }
         engine.prepare()
         try engine.start()
@@ -54,45 +60,89 @@ final class SpeechService {
         audioBuffer = Data()
         guard !recordedData.isEmpty else { return nil }
 
-        let wavData = encodeWAV(pcmData: recordedData, sampleRate: 16000, channels: 1, bitsPerSample: 16)
-        return await transcribe(audioData: wavData, mimeType: "audio/wav", fileName: "recording.wav")
+        let wavData = encodeWAV(
+            pcmData: recordedData,
+            sampleRate: Int(activeSampleRate),
+            channels: 1,
+            bitsPerSample: 16
+        )
+        return await transcribe(audioData: wavData)
     }
 
     private func haltRecording() {
         guard isRecording else { return }
         engine.stop()
         engine.inputNode.removeTap(onBus: 0)
+        converter = nil
         isRecording = false
     }
 
-    private func transcribe(audioData: Data, mimeType: String, fileName: String) async -> String? {
+    private func installTap(format: AVAudioFormat, convertingTo targetFormat: AVAudioFormat?) {
+        let input = engine.inputNode
+        input.removeTap(onBus: 0)
+        input.installTap(onBus: 0, bufferSize: 2048, format: format) { [weak self] buffer, _ in
+            guard let self else { return }
+            let pcm: AVAudioPCMBuffer
+            if let targetFormat, let converter = self.converter {
+                pcm = Self.convert(buffer, with: converter, to: targetFormat) ?? buffer
+            } else {
+                pcm = buffer
+            }
+            guard let channel = pcm.floatChannelData?[0] else { return }
+            let frameCount = Int(pcm.frameLength)
+            var samples = [Int16](repeating: 0, count: frameCount)
+            for index in 0..<frameCount {
+                let clamped = max(-1.0, min(1.0, Float(channel[index])))
+                samples[index] = Int16(clamped * Float(Int16.max))
+            }
+            let data = samples.withUnsafeBufferPointer { Data(buffer: $0) }
+            Task { @MainActor in
+                self.audioBuffer.append(data)
+            }
+        }
+    }
+
+    /// 单次把一个 native 缓冲区完整转换为 16kHz 单声道。
+    private nonisolated static func convert(
+        _ input: AVAudioPCMBuffer,
+        with converter: AVAudioConverter,
+        to format: AVAudioFormat
+    ) -> AVAudioPCMBuffer? {
+        let ratio = format.sampleRate / input.format.sampleRate
+        let capacity = AVAudioFrameCount(Double(input.frameLength) * ratio) + 32
+        guard let output = AVAudioPCMBuffer(pcmFormat: format, frameCapacity: capacity) else { return nil }
+        var error: NSError?
+        var inputExhausted = false
+        let status = converter.convert(to: output, error: &error) { _, outStatus in
+            if inputExhausted {
+                outStatus.pointee = .noDataNow
+                return nil
+            }
+            inputExhausted = true
+            outStatus.pointee = .haveData
+            return input
+        }
+        guard error == nil, status != .error, output.frameLength > 0 else { return nil }
+        return output
+    }
+
+    private func transcribe(audioData: Data) async -> String? {
         guard let baseURL else {
             return mockTranscribe()
         }
-        let url = baseURL.appendingPathComponent("audio/transcriptions")
-        let boundary = UUID().uuidString
-        var request = URLRequest(url: url)
-        request.httpMethod = "POST"
-        request.setValue("multipart/form-data; boundary=\(boundary)", forHTTPHeaderField: "Content-Type")
-        if let apiKey, !apiKey.isEmpty {
-            request.setValue("Bearer \(apiKey)", forHTTPHeaderField: "Authorization")
-        }
-        request.timeoutInterval = 30
-
-        var body = Data()
-        body.appendMultipart(name: "model", value: "whisper-1", boundary: boundary)
-        body.appendMultipart(name: "language", value: "zh", boundary: boundary)
-        body.appendFilePart(name: "file", filename: fileName, mimeType: mimeType, data: audioData, boundary: boundary)
-        body.append("--\(boundary)--\r\n".data(using: .utf8)!)
-        request.httpBody = body
-
+        let client = OpenAI(
+            configuration: OpenAIProvider.makeConfiguration(baseURL: baseURL, apiKey: apiKey ?? "")
+        )
         do {
-            let (data, response) = try await URLSession.shared.data(for: request)
-            guard let http = response as? HTTPURLResponse, (200...299).contains(http.statusCode) else {
-                return nil
-            }
-            let decoded = try JSONDecoder().decode(WhisperResponse.self, from: data)
-            return decoded.text
+            let result = try await client.audioTranscriptions(
+                query: AudioTranscriptionQuery(
+                    file: audioData,
+                    fileType: .wav,
+                    model: "whisper-1",
+                    language: "zh"
+                )
+            )
+            return result.text
         } catch {
             return nil
         }
@@ -123,26 +173,6 @@ final class SpeechService {
         header.append(UInt32(dataSize).littleEndianBytes)
         header.append(pcmData)
         return header
-    }
-}
-
-private struct WhisperResponse: Decodable {
-    var text: String
-}
-
-private extension Data {
-    mutating func appendMultipart(name: String, value: String, boundary: String) {
-        append("--\(boundary)\r\n".data(using: .utf8)!)
-        append("Content-Disposition: form-data; name=\"\(name)\"\r\n\r\n".data(using: .utf8)!)
-        append("\(value)\r\n".data(using: .utf8)!)
-    }
-
-    mutating func appendFilePart(name: String, filename: String, mimeType: String, data: Data, boundary: String) {
-        append("--\(boundary)\r\n".data(using: .utf8)!)
-        append("Content-Disposition: form-data; name=\"\(name)\"; filename=\"\(filename)\"\r\n".data(using: .utf8)!)
-        append("Content-Type: \(mimeType)\r\n\r\n".data(using: .utf8)!)
-        append(data)
-        append("\r\n".data(using: .utf8)!)
     }
 }
 

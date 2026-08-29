@@ -1,6 +1,7 @@
 import Charts
 import SwiftData
 import SwiftUI
+import UIKit
 
 struct TodayView: View {
     @Environment(AppEnvironment.self) private var env
@@ -15,6 +16,15 @@ struct TodayView: View {
     @State private var selectedMetric: MetricType = .restingHeartRate
     @State private var showDietChat = false
     @State private var showRiskList = false
+    @State private var showLabEntry = false
+    @State private var healthAuthBanner: HealthAuthBanner = .none
+
+    /// 健康数据授权状态横幅：未决可重新弹授权；已拒绝（读不到任何数据）只能引导去系统设置。
+    enum HealthAuthBanner {
+        case none
+        case needsRequest
+        case denied
+    }
 
     /// 趋势图可切换的指标，按病种相关度排序。
     private let chartMetrics: [MetricType] = [
@@ -31,6 +41,9 @@ struct TodayView: View {
         NavigationStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: 12) {
+                    if healthAuthBanner != .none {
+                        healthAuthBannerCard
+                    }
                     followUpCard
                     medicationCard
                     adviceCard
@@ -44,13 +57,32 @@ struct TodayView: View {
             .navigationTitle("今日")
             .task {
                 await loadMetrics()
+                await evaluateHealthAuth()
                 NotificationService.syncMedicationReminders(from: medications)
                 let profile = env.profile()
                 let isDiabetic = profile.parsedConditions.contains(.diabetes)
                 NotificationService.scheduleDietReminders(forDiabetic: isDiabetic)
             }
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button {
+                        showLabEntry = true
+                    } label: {
+                        Image(systemName: "cross.case")
+                    }
+                    .accessibilityLabel("录入化验指标")
+                }
+            }
             .sheet(isPresented: $showDietChat) {
                 DietChatView()
+            }
+            .sheet(isPresented: $showLabEntry, onDismiss: {
+                Task {
+                    await loadMetrics()
+                    await env.refreshTodayPipeline()
+                }
+            }) {
+                LabEntrySheet()
             }
             .sheet(isPresented: $showRiskList) {
                 RiskListSheet(
@@ -72,15 +104,20 @@ struct TodayView: View {
 
     private func loadMetrics() async {
         let provider = env.healthProvider
+        let latestLabs = LabMetricStore.latestLabMetrics(context: env.context)
         for type in chartMetrics {
             seriesByType[type] = await provider.dailySeries(type, days: 14)
             if let metric = await provider.metric(type, on: Date()) {
                 todayMetrics[type] = metric
+            } else if let lab = latestLabs[type] {
+                todayMetrics[type] = lab
             }
         }
         for type in insightMetrics where todayMetrics[type] == nil {
             if let metric = await provider.metric(type, on: Date()) {
                 todayMetrics[type] = metric
+            } else if let lab = latestLabs[type] {
+                todayMetrics[type] = lab
             }
         }
         let yesterday = Calendar.current.date(byAdding: .day, value: -1, to: Date()) ?? Date()
@@ -89,6 +126,64 @@ struct TodayView: View {
            (seriesByType[selectedMetric] ?? []).isEmpty {
             selectedMetric = firstAvailable
         }
+    }
+
+    // MARK: 健康数据授权
+
+    /// 未决 → 重新弹授权；已决定但一个指标都读不到 → 大概率被拒绝，引导去系统设置。
+    private func evaluateHealthAuth() async {
+        guard !env.demoMode else {
+            healthAuthBanner = .none
+            return
+        }
+        if await env.healthProvider.authorizationNeedsRequest() {
+            healthAuthBanner = .needsRequest
+            return
+        }
+        let hasAnyData = !todayMetrics.isEmpty
+            || seriesByType.values.contains { !$0.isEmpty }
+            || sleepHours != nil
+            || !LabMetricStore.latestLabMetrics(context: env.context).isEmpty
+        healthAuthBanner = hasAnyData ? .none : .denied
+    }
+
+    private func resolveHealthAuth() async {
+        if healthAuthBanner == .needsRequest {
+            try? await env.healthProvider.requestAuthorization()
+            await loadMetrics()
+            await evaluateHealthAuth()
+        } else if let url = URL(string: UIApplication.openSettingsURLString) {
+            await UIApplication.shared.open(url)
+        }
+    }
+
+    private var healthAuthBannerCard: some View {
+        let needsRequest = healthAuthBanner == .needsRequest
+        return HStack(spacing: 10) {
+            Image(systemName: "heart.text.square")
+                .foregroundStyle(CareTheme.sage)
+            VStack(alignment: .leading, spacing: 2) {
+                Text(needsRequest ? "连接健康数据" : "未读到健康数据")
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(CareTheme.ink)
+                Text(needsRequest
+                     ? "授权读取心率、睡眠、血压等指标，用于个人基线与风险提示。"
+                     : "请检查系统设置中的健康数据权限，或确认健康 App 中有可读数据。")
+                    .font(.caption)
+                    .foregroundStyle(CareTheme.muted)
+            }
+            Spacer()
+            Button(needsRequest ? "去授权" : "去设置") {
+                Task { await resolveHealthAuth() }
+            }
+            .font(.caption.weight(.semibold))
+            .foregroundStyle(CareTheme.sage)
+            .buttonStyle(.plain)
+        }
+        .padding(12)
+        .background(
+            RoundedRectangle(cornerRadius: 14, style: .continuous).fill(CareTheme.sageSoft)
+        )
     }
 
     // MARK: 区块一：下次复诊（置顶）

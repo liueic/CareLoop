@@ -38,7 +38,7 @@ enum BaobaoPersona {
     static let name = "饱饱"
 
     static let greeting = "嗨呀，今天想吃点什么呀 (=^･^=)"
-    static let quickReplies = ["今天吃什么", "想吃清淡点", "不想吃苦瓜"]
+    static let quickReplies = ["今天吃什么", "附近吃点什么", "想吃清淡点", "不想吃苦瓜"]
 
     static let confirmWords = ["就这个", "就它了", "可以", "好的", "好呀", "行", "嗯", "ok", "OK", "选定"]
 
